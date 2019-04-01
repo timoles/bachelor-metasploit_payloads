@@ -101,12 +101,13 @@ static BOOL read_response_wininet(HANDLE hReq, LPVOID buffer, DWORD bytesToRead,
  */
 static BOOL send_request_wininet(HttpTransportContext* ctx, HANDLE hReq, LPVOID buffer, DWORD size)
 {
+	dprintf("[TIMOTRANSPORTWININET]");
 	if (ctx->custom_headers)
 	{
 		dprintf("[WINHTTP] Sending with custom headers: %S", ctx->custom_headers);
 		return HttpSendRequestW(hReq, ctx->custom_headers, -1L, buffer, size);
 	}
-
+	
 	return HttpSendRequestW(hReq, NULL, 0, buffer, size);
 }
 

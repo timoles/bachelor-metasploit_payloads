@@ -192,11 +192,14 @@ static BOOL read_response_winhttp(HANDLE hReq, LPVOID buffer, DWORD bytesToRead,
  */
 static BOOL send_request_winhttp(HttpTransportContext* ctx, HANDLE hReq, LPVOID buffer, DWORD size)
 {
+	dprintf("[TIMOTRANSPORTWINHTTP]");
+
 	if (ctx->custom_headers)
 	{
 		dprintf("[WINHTTP] Sending with custom headers: %S", ctx->custom_headers);
 		return WinHttpSendRequest(hReq, ctx->custom_headers, -1L, buffer, size, size, 0);
 	}
+	
 
 	return WinHttpSendRequest(hReq, NULL, 0, buffer, size, size, 0);
 }

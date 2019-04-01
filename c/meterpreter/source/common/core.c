@@ -1322,6 +1322,7 @@ DWORD packet_transmit(Remote* remote, Packet* packet, PacketRequestCompletion* c
 		dprintf("[PACKET] Remote: %p", remote);
 		dprintf("[PACKET] Transport: %p", remote->transport);
 		dprintf("[PACKET] Packet Transmit: %p", remote->transport->packet_transmit);
+		dprintf("[TIMOCORE] This is encrypted packet %p", encryptedPacket);
 		SetLastError(remote->transport->packet_transmit(remote, encryptedPacket, encryptedPacketLength));
 	} while (0);
 
