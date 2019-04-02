@@ -208,7 +208,7 @@ static BOOL send_request_winhttp(HttpTransportContext* ctx, HANDLE hReq, LPVOID 
 	else{
 		dprintf("[TIMOTRANSPORTWINHTTP] Malleable NOT loaded!");
 	}
-
+	// do we need to free pointer? TIMO
 	if (ctx->custom_headers)
 	{
 		dprintf("[WINHTTP] Sending with custom headers: %S", ctx->custom_headers);

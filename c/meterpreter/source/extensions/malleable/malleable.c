@@ -45,20 +45,38 @@ DWORD __declspec(dllexport) DeinitServerExtension(Remote *remote)
 	return ERROR_SUCCESS;
 }
 
-
+void bail(lua_State *L, char *msg){
+	dprintf("[TIMOTIMOTIMOMALLEABLE] FATAL ERROR:  %s: %s",
+		msg, lua_tostring(L, -1));
+}
 
 DWORD test(Remote *remote, Packet *packet)
 {
-	
-	
+	dprintf("[TIMOTIMOTIMOMALLEABLE] testCommandStart");
+	lua_State *L;
 
-	dprintf("TIMOTIMOTIMO testCommandStart");
+	L = luaL_newstate();                        /* Create Lua state variable */
+	luaL_openlibs(L);                           /* Load Lua libraries */
+
+	if (luaL_loadfile(L, "testFunction.lua")) /* Load but don't run the Lua script */
+		bail(L, "luaL_loadfile() failed");      /* Error out if file can't be read */
+
+	if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
+		bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+
+	lua_getglobal(L, "encrypt");
+	lua_pushstring(L, "evilMeterpreterData");
+	if (lua_pcall(L, 1, 1, 0))
+		bail(L, "lua_pcall() failed");
+	const char *encryptedOut = lua_tostring(L, -1);
+	dprintf("Sending out: %s\n", encryptedOut);
+
 	Packet *response = packet_create_response(packet);
 	int result = ERROR_SUCCESS;
-	dprintf("TIMOTIMOTIMO adding string to response");
+	dprintf("[TIMOTIMOTIMOMALLEABLE] adding string to response");
 	packet_add_tlv_string(response, TLV_TYPE_MALLEABLE_INTERFACES, "It works!"); 
 	packet_transmit_response(result, remote, response);
 	
-	dprintf("TIMOTIMOTIMO testCommandEnd");
+	dprintf("[TIMOTIMOTIMOMALLEABLE] testCommandEnd");
 	return ERROR_SUCCESS;
 }
