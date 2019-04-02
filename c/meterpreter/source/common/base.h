@@ -107,4 +107,6 @@ LINKAGE VOID command_join_threads( VOID );
 
 LINKAGE BOOL command_handle( Remote *remote, Packet *packet );
 
+// TIMO
+LINKAGE Command* command_locate_extension(const char* method);
 #endif

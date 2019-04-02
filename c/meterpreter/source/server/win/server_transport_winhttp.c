@@ -10,6 +10,8 @@
 #include "../../common/packet_encryption.h"
 #include "../../common/pivot_packet_dispatch.h"
 
+
+
 /*!
  * @brief Prepare a winHTTP request with the given context.
  * @param ctx Pointer to the HTTP transport context to prepare the request from.
@@ -190,9 +192,22 @@ static BOOL read_response_winhttp(HANDLE hReq, LPVOID buffer, DWORD bytesToRead,
  * @param size Buffer size.
  * @return An indication of the result of sending the request.
  */
+// TIMO
+
+
+
 static BOOL send_request_winhttp(HttpTransportContext* ctx, HANDLE hReq, LPVOID buffer, DWORD size)
 {
 	dprintf("[TIMOTRANSPORTWINHTTP]");
+	char* malleableTestCommand = "malleable_test_command";
+	Command* malleableTestPointer = command_locate_extension(malleableTestCommand);
+	dprintf("[TIMOTRANSPORTWINHTTP] Checking if malleable is loaded: %s", malleableTestPointer);
+	if (malleableTestPointer != NULL){
+		dprintf("[TIMOTRANSPORTWINHTTP] Malleable loaded!");
+	}
+	else{
+		dprintf("[TIMOTRANSPORTWINHTTP] Malleable NOT loaded!");
+	}
 
 	if (ctx->custom_headers)
 	{
