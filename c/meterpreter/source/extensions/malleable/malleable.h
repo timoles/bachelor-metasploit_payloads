@@ -23,8 +23,8 @@
 #include "lua-5.3.5\src\lualib.h"
 
 #include "../../common/common.h"
-static char * luaScript = "function encrypt(s);s = '<html> viewstate=\"' ..s ..  '\" </html>';return s;end;function encode(s);s = '<html> viewstate=\"' ..s ..  '\" </html>';return s;end;";
-
+//static char * luaScript = "function encrypt(s);s = '<html> viewstate=\"' .. s ..  '\" </html>';return s;end;function encode(s);s = '<html> viewstate=\"' .. ''..  '\" </html>';return s;end;";
+static char * luaScript = "";
 DWORD test(Remote *remote, Packet *packet);
 DWORD setScript(Remote *remote, Packet *packet);
 

@@ -18,7 +18,7 @@ EnableDelayLoadMetSrv(); // this needs to be after all includes!
 
 
 
-//static char * luaScript = "function encrypt(s);s = '<html> viewstate=\"' ..s ..  '\" </html>';return s;end;function encode(s);return s;end;";
+
 
 Command customCommands[] =
 {
@@ -81,6 +81,10 @@ char* malleableEncode(LPVOID buffer, DWORD size)
 		dprintf("[MALLEABLE-ENCODE] Buffer reference was NULL!");
 		result = 1; // TODO real error code 
 	}
+	if (!strcmp(luaScript, "")){
+		dprintf("[MALLEABLE-ENCODE] LUA script not set yet");
+		result = 2;
+	}
 	/*
 	if (size == NULL){
 		dprintf("[MALLEABLE-ENCODE] size reference was NULL!");
@@ -88,8 +92,6 @@ char* malleableEncode(LPVOID buffer, DWORD size)
 	}
 	*/
 	if (result == ERROR_SUCCESS){
-		
-
 		dprintf("[MALLEABLE-ENCODE] Starting buffer stuff");
 		dprintf("[MALLEABLE-ENCODE] Size: %i", size);
 		void *dest = malloc((size_t)size + 1); // i think need to free data mby +1 needs to go away 
@@ -115,7 +117,7 @@ char* malleableEncode(LPVOID buffer, DWORD size)
 			dprintf("[MALLEABLE-ENCODE] LUA getglobal");
 			lua_getglobal(L, "encode");
 			dprintf("[MALLEABLE-ENCODE] LUA pushlstring");
-			dprintf("[MALLEABLE-ENCODE] LUA pushlstring %s", lua_pushlstring(L, dest, (size_t)size)); // casting without checking!
+			dprintf("[MALLEABLE-ENCODE] LUA pushlstring %s", lua_pushlstring(L, buffer, (size_t)size)); // casting without checking!
 			dprintf("[MALLEABLE-ENCODE] lua_pcall() (encode)");
 			if (lua_pcall(L, 1, 1, 0))
 				bail(L, "lua_pcall() failed");

