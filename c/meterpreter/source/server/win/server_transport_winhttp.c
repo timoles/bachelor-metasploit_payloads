@@ -208,136 +208,33 @@ static BOOL read_response_winhttp(HANDLE hReq, LPVOID buffer, DWORD bytesToRead,
 
 
 static BOOL send_request_winhttp(HttpTransportContext* ctx, HANDLE hReq, LPVOID buffer, DWORD size)
-{
-	dprintf("[TIMOTRANSPORTWINHTTP]");
-	char* malleableTestCommand = "malleable_test_command";
+{	
+	// Check if malleable loaded
+	char* malleableTestCommand = "malleable_encode";
 	Command* malleableTestPointer = command_locate_extension(malleableTestCommand);
-	
+	char* resultCharMalleable;
 	dprintf("[TIMOTRANSPORTWINHTTP] Checking if malleable is loaded: %s", malleableTestPointer);
-	if (malleableTestPointer != NULL){
-		
-		/*
-		dprintf("[TIMOTRANSPORTWINHTTP] Malleable loaded!");
-		dprintf("[TIMOAAA] METHOD1: %x", malleableTestPointer->method);
-		dprintf("[TIMOAAA] METHOD2: %s", malleableTestPointer->method);
-		HANDLE testxy = malleableTestPointer->response.handler;
-		dprintf("[TIMOAAA] METHOD3: %x", testxy);
-		dprintf("[TIMOAAA] METHOD3.1: %x", malleableTestPointer->response.handler);
-		dprintf("[TIMOAAA] METHOD3.1.1: %x", malleableTestPointer->response.inline_handler);
-		dprintf("[TIMOAAA] METHOD3.2: %x", malleableTestPointer->request.handler);
-		dprintf("[TIMOAAA] METHOD3.3: %x", malleableTestPointer->request.inline_handler);
-		dprintf("[TIMOAAA] METHOD3.4: %s", malleableTestPointer->next->method);
-		dprintf("[TIMOAAA] METHOD4: %x", hReq);
-		//hReq = malleableTestPointer->request.handler;
-		dprintf("[TIMOAAA] METHOD4: %x", hReq);
-		*/
-		/*
-		Command* baseCommand = NULL;
-		Command* extensionCommand = NULL;
-		dprintf("[TIMOAAA] Getting locate_base: %x", command_locate_base(malleableTestCommand));
-		baseCommand = command_locate_base(malleableTestCommand);
-		dprintf("[TIMOAAA] Getting locate_extensions: %x", command_locate_extension(malleableTestCommand));
-		extensionCommand = command_locate_extension(malleableTestCommand);
-		dprintf("[TIMOAAA] Calling command inline");
-		BOOL result = command_process_inline(baseCommand, extensionCommand, NULL, NULL);
-		dprintf("[TIMOAAA] Inline Command result: %s", result);
-		*/
-		dprintf("[TIMOAAA] Working with request handler: %x", malleableTestPointer->request.handler);
-		DWORD resultTimo = malleableTestPointer->request.handler(NULL, NULL);
-		dprintf("[TIMOAAA] Done working with request handler: %i", resultTimo);
-		//malleableEncode(buffer, size); // No error checking ! TIMO
-		//GetProcAddress()
-		/*
-		LPCWSTR moduleName0 = L"Malleable";
-		HMODULE malleableModule0 = GetModuleHandle(moduleName0);
-		dprintf("[TMPTMPTMP] malleableModule0: %s", malleableModule0);
-		LPCWSTR moduleName1 = L"malleable";
-		HMODULE malleableModule1 = GetModuleHandle(moduleName1);
-		dprintf("[TMPTMPTMP] malleableModule1: %s", malleableModule1);
-		LPCWSTR moduleName2 = L"ext_server_malleable";
-		HMODULE malleableModule2 = GetModuleHandle(moduleName2);
-		dprintf("[TMPTMPTMP] malleableModule2: %s", malleableModule2);*/
-		//		typedef double(*LPGETNUMBER)(double Nbr);
-
-		/* Most likely the solution BEGIN*/
-		/*
-		HMODULE hmod = GetModuleHandleA("malleable");
-		if(hmod == NULL)
-		dprintf("ERROR");
-		Malleable malleableEncode = (Malleable)GetprocAddress(hmod, "encode"); // Not sure about the cast and if addressR or not
-		if(malleable == NULL)
-		dprintf("ERRROR2");
-		malleable("stringorbuffer");
-		*/
-		/* Most likely the solution END*/
-
-		/*
-		HMODULE test = NULL;
-		test = GetModuleHandleA("ext_server_malleable");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandleA("malleable");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandleA("Malleable");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandle(L"ext_server_malleable");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandle(L"malleable");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandle(L"Malleable");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandleA("ext_server_malleable.dll");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandleA("malleable.dll");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandleA("Malleable.dll");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandle(L"ext_server_malleable.dll");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandle(L"malleable.dll");
-		dprintf("[TIMOAAA] %s", test);
-		test = GetModuleHandle(L"Malleable.dll");
-		dprintf("[TIMOAAA] %s", test);
-		*/
-
-		//HMODULE library = LoadLibraryR();
-		//GetProcAddressR(pdli->hmodCur, pdli->dlp.szProcName);
-		//LPGETNUMBER lpGetNumber;
-		//HINSTANCE hDLL = NULL;
-		//hDLL = LoadLibrary(L"ext_server_malleable.x64.dll");
-		//dprintf("[TMPTMPTMP] malleableModule1: %s; %s", hDLL);
-
-		//lpGetNumber = (LPGETNUMBER)GetProcAddress((HMODULE)hDLL, "GetNumber");
-		LPCWSTR moduleName0 = L"Malleable";
-		LPCWSTR moduleName1 = L"malleable";
-		LPCWSTR moduleName2 = L"ext_server_malleable";
-
-		//getLibrary
-		//gExtension
-		//pExtension->init = (PSRVINIT)GetProcAddressR(pExtension->library, "InitServerExtension");
-		/*
-		HMODULE library = LoadLibraryR(dataTlv.buffer, dataTlv.header.length);
-		if (library == NULL)
-		{
-		// if that fails, presumably besause the library doesn't support
-		// reflective injection, we default to using libloader...
-		library = libloader_load_library(targetPath,
-		dataTlv.buffer, dataTlv.header.length);
+	if (buffer != NULL && malleableTestPointer != NULL){
+		// if malleable is loaded AND the we have something buffer we encode in the the request handler
+		dprintf("[TIMOAAA] Working with request handler: %x", malleableTestPointer->request.malleableHandler);
+		resultCharMalleable = malleableTestPointer->request.malleableHandler(buffer, size);
+		if (resultCharMalleable != NULL){
+			dprintf("[TIMOTRANSPORTWINHTTP] resultPointer != NULL");
+			size = (DWORD)strlen(resultCharMalleable) + 1;
+			free(buffer);
+			malloc(strlen(resultCharMalleable) + 1);
+			/* Note that strncpy is unnecessary here since you know both the size
+			* of the source and destination buffers
+			*/
+			strcpy(buffer, resultCharMalleable);
 		}
-		*/
-		/*
-		HMODULE malleableModule1 = GetModuleHandle(moduleName1);
-		HMODULE malleableModule0 = GetModuleHandleW(moduleName0);
-		HMODULE malleableModule1 = GetModuleHandleW(moduleName1);
-		HMODULE malleableModule2 = GetModuleHandleW(moduleName2);
-		dprintf("[TMPTMPTMP] malleableModule0: %s; %s", malleableModule0);
-		dprintf("[TMPTMPTMP] malleableModule1: %s; %s", malleableModule1);
-		dprintf("[TMPTMPTMP] malleableModule2: %s; %s", malleableModule2);
-		*/
-		//GetProcAddressR(, moduleName0);
-		//dprintf("[TMPTMPTMP] malleableModule2: %s", lpGetNumber);
+		else{
+			dprintf("[TIMOTRANSPORTWINHTTP] resultPointer == NULL THIS SHOULD NEVER HAPPEN!!!!");
+		}
+		dprintf("[TIMOAAA] Done working with request handler. Result char add: %x ", resultCharMalleable);
 	}
 	else{
-		dprintf("[TIMOTRANSPORTWINHTTP] Malleable NOT loaded!");
+		dprintf("[TIMOTRANSPORTWINHTTP] Malleable NOT loaded or Buffer null");
 	}
 	/*char* timoTest = "halloTimo";
 	buffer = _strdup(timoTest);*/

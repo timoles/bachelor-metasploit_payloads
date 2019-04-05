@@ -24,6 +24,7 @@ Command customCommands[] =
 {
 	COMMAND_REQ("malleable_test_command", test),
 	COMMAND_REQ("malleable_set_script", setScript),
+	COMMAND_MALLEABLE("malleable_encode", malleableEncode),
 	COMMAND_TERMINATOR
 };
 
@@ -52,7 +53,7 @@ DWORD __declspec(dllexport) DeinitServerExtension(Remote *remote)
 }
 
 void bail(lua_State *L, char *msg){
-	dprintf("[MALLEABLE] FATAL ERROR:  %s: %s",
+	dprintf("[MALLEABLE-FATAL-LUA] FATAL ERROR:  %s: %s",
 		msg, lua_tostring(L, -1));
 }
 
@@ -72,39 +73,69 @@ DWORD setScript(Remote *remote, Packet *packet)
 	return ERROR_SUCCESS;
 }
 
-DWORD malleableEncode(LPVOID buffer, DWORD size)
+char* malleableEncode(LPVOID buffer, DWORD size)
 {
-	dprintf("[MALLEABLE] Encoding for Transport");
-	lua_State *L;
-	L = luaL_newstate();                        /* Create Lua state variable */
-	luaL_openlibs(L);                           /* Load Lua libraries */
-	dprintf("[MALLEABLE] luaL_loadstring(): script: \"%s\"", luaScript);
-	if (luaL_loadstring(L, luaScript)) /* Load but don't run the Lua script */
-		bail(L, "luaL_loadstring() failed");      /* Error out if file can't be read */
-	dprintf("[MALLEABLE] lua_pcall(0,0,0) (init)");
-	if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
-		bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+	dprintf("[MALLEABLE-ENCODE] Malleable encode start");
+	BOOL result = ERROR_SUCCESS;
+	if (buffer == NULL){
+		dprintf("[MALLEABLE-ENCODE] Buffer reference was NULL!");
+		result = 1; // TODO real error code 
+	}
+	/*
+	if (size == NULL){
+		dprintf("[MALLEABLE-ENCODE] size reference was NULL!");
+		result = ERROR; // TODO real error code 
+	}
+	*/
+	if (result == ERROR_SUCCESS){
+		
+
+		dprintf("[MALLEABLE-ENCODE] Starting buffer stuff");
+		dprintf("[MALLEABLE-ENCODE] Size: %i", size);
+		void *dest = malloc((size_t)size + 1); // i think need to free data mby +1 needs to go away 
+		//strcpy_s((const char*)data, (size_t)size, (char*) buffer); //mby manually null terminate
+		// this things is probalby terminating on null bytes, we dont wan't that we want to copy everything!
+
+		strncpy_s((char*)dest , (size_t)size+1, (char*)buffer, (size_t)size-1); 
+		dprintf("[MALLEABLE-ENCODE] String address: %x", dest);
+		dprintf("[MALLEABLE-ENCODE] String: %s", dest);
+		//if (!strcmp(dest, ""))
+		//{
+			dprintf("[MALLEABLE-ENCODE] Encoding for transport.");
+			lua_State *L;
+			L = luaL_newstate();                        /* Create Lua state variable */
+			luaL_openlibs(L);                           /* Load Lua libraries */
+			dprintf("[MALLEABLE] luaL_loadstring(): script: \"%s\"", luaScript);
+			if (luaL_loadstring(L, luaScript)) /* Load but don't run the Lua scripnt */
+				bail(L, "luaL_loadstring() failed");      /* Error out if file can't be read */
+			dprintf("[MALLEABLE-ENCODE] lua_pcall(0,0,0) (init)");
+			dprintf("[MALLEABLE-ENCODE] LUA pcall answer: %i", lua_pcall(L, 0, 0, 0));
+			//if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
+			//	bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+			dprintf("[MALLEABLE-ENCODE] LUA getglobal");
+			lua_getglobal(L, "encode");
+			dprintf("[MALLEABLE-ENCODE] LUA pushlstring");
+			dprintf("[MALLEABLE-ENCODE] LUA pushlstring %s", lua_pushlstring(L, dest, (size_t)size)); // casting without checking!
+			dprintf("[MALLEABLE-ENCODE] lua_pcall() (encode)");
+			if (lua_pcall(L, 1, 1, 0))
+				bail(L, "lua_pcall() failed");
+			const char *encodedOut = lua_tostring(L, -1);
+			dprintf("[MALLEABLE-ENCODE] Got \"%s\" back from lua_tostring()", encodedOut);
+			dprintf("[MALLEABLE-ENCODE] Giving buffer(%x) address %x", encodedOut);
+			dprintf("[MALLEABLE-ENCODE] Still going strong");
+			free(dest);
+			lua_close(L);
+			dprintf("[MALLEABLE-ENCODE] Still working");
+			return _strdup(encodedOut);
+		//}
+	}
 	
-	lua_getglobal(L, "encode");
-	lua_pushlstring(L, (const char*)buffer,(size_t)size); // casting without checking!
-	dprintf("[MALLEABLE] lua_pcall() (encode)");
-	if (lua_pcall(L, 1, 1, 0))
-		bail(L, "lua_pcall() failed");
-	const char *encodedOut = lua_tostring(L, -1);
-	dprintf("Got \"%s\" back from lua_tostring()", encodedOut);
-	return ERROR_SUCCESS;
+	dprintf("[MALLEABLE-ENCODE] Malleable encode end");
+	return NULL;
 }
 
 DWORD test(Remote *remote, Packet *packet)
 {
-	
-	dprintf("[MALLEABLE] testCommandStart");
-	if (remote == NULL && packet == NULL){
-		dprintf("[MALLEABLE] Im happy :)");
-		
-		dprintf("[MALLEABLE] What about now?");
-		return ERROR_SUCCESS;
-	}
 	lua_State *L;
 
 	L = luaL_newstate();                        /* Create Lua state variable */

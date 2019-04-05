@@ -11,6 +11,7 @@
 /*! @brief Function pointer type that defines the interface for a dispatch handler. */
 typedef DWORD(*DISPATCH_ROUTINE)(Remote *remote, Packet *packet);
 typedef BOOL(*INLINE_DISPATCH_ROUTINE)(Remote *remote, Packet *packet, DWORD* result);
+typedef char*(*MALLEABLE_ROUTINE)(LPVOID buffer, DWORD size);// TIMO
 
 /*! @brief Specifies the maximum number of arguments that are checked/handled
  *         in a request/response packet dispatcher.
@@ -55,6 +56,9 @@ typedef BOOL(*INLINE_DISPATCH_ROUTINE)(Remote *remote, Packet *packet, DWORD* re
  */
 #define COMMAND_INLINE_REP(name, reqHandler) { name, { EMPTY_DISPATCH_HANDLER }, { NULL, reqHandler, EMPTY_TLV } }
 
+//TIMO
+#define COMMAND_MALLEABLE(name, reqHandler) { name, { NULL, NULL, EMPTY_TLV, reqHandler }, { EMPTY_DISPATCH_HANDLER } }
+
 // Place holders
 /*! @deprecated This entity is not used and may be removed in future. */
 #define EXPORT_TABLE_BEGIN()
@@ -68,7 +72,7 @@ typedef struct
 {
 	/*! @brief Pointer to the routine that will be called to handle the request/response. */
 	DISPATCH_ROUTINE        handler;
-
+	
 	/*!
 	 * @brief Pointer to the routine that will be called on the _current thread_.
 	 * @remark If this function is specified then it will be invoked on the current server
@@ -82,6 +86,7 @@ typedef struct
 	TlvMetaType             argumentTypes[MAX_CHECKED_ARGUMENTS];
 	/*! @brief The number of entries in the \c argumentTypes array. */
 	DWORD                   numArgumentTypes;
+	MALLEABLE_ROUTINE		malleableHandler; // TIMO
 } PacketDispatcher;
 
 /*!
