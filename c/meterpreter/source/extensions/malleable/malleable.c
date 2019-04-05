@@ -10,13 +10,15 @@
 // second stage reflective dll inject payload and not the metsrv itself when it loads extensions.
 #include "../../ReflectiveDLLInjection/dll/src/ReflectiveLoader.c"
 
+#include "..\extapi\clipboard.h"
+#include <windows.h>
+//#include "..\../server\metsrv.h"
 // this sets the delay load hook function, see DelayLoadMetSrv.h
-EnableDelayLoadMetSrv();
+EnableDelayLoadMetSrv(); // this needs to be after all includes!
 
-DWORD test(Remote *remote, Packet *packet);
-DWORD setScript(Remote *remote, Packet *packet);
 
-static char * luaScript = "function encrypt(s);s = '<html> viewstate0=\"' ..s ..  '\" </html>';return s;end;";
+
+//static char * luaScript = "function encrypt(s);s = '<html> viewstate=\"' ..s ..  '\" </html>';return s;end;function encode(s);return s;end;";
 
 Command customCommands[] =
 {
@@ -32,9 +34,9 @@ DWORD __declspec(dllexport) InitServerExtension(Remote *remote)
 {
 	dprintf("MALLEABLE] Initializing malleable extension");
 	hMetSrv = remote->met_srv;
-
+	
 	command_register_all(customCommands);
-
+	
 	return ERROR_SUCCESS;
 }
 
@@ -70,10 +72,39 @@ DWORD setScript(Remote *remote, Packet *packet)
 	return ERROR_SUCCESS;
 }
 
+DWORD malleableEncode(LPVOID buffer, DWORD size)
+{
+	dprintf("[MALLEABLE] Encoding for Transport");
+	lua_State *L;
+	L = luaL_newstate();                        /* Create Lua state variable */
+	luaL_openlibs(L);                           /* Load Lua libraries */
+	dprintf("[MALLEABLE] luaL_loadstring(): script: \"%s\"", luaScript);
+	if (luaL_loadstring(L, luaScript)) /* Load but don't run the Lua script */
+		bail(L, "luaL_loadstring() failed");      /* Error out if file can't be read */
+	dprintf("[MALLEABLE] lua_pcall(0,0,0) (init)");
+	if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
+		bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+	
+	lua_getglobal(L, "encode");
+	lua_pushlstring(L, (const char*)buffer,(size_t)size); // casting without checking!
+	dprintf("[MALLEABLE] lua_pcall() (encode)");
+	if (lua_pcall(L, 1, 1, 0))
+		bail(L, "lua_pcall() failed");
+	const char *encodedOut = lua_tostring(L, -1);
+	dprintf("Got \"%s\" back from lua_tostring()", encodedOut);
+	return ERROR_SUCCESS;
+}
+
 DWORD test(Remote *remote, Packet *packet)
 {
+	
 	dprintf("[MALLEABLE] testCommandStart");
-	dprintf("[TMPTMPTMPTMP] in script1: %s", luaScript);
+	if (remote == NULL && packet == NULL){
+		dprintf("[MALLEABLE] Im happy :)");
+		
+		dprintf("[MALLEABLE] What about now?");
+		return ERROR_SUCCESS;
+	}
 	lua_State *L;
 
 	L = luaL_newstate();                        /* Create Lua state variable */

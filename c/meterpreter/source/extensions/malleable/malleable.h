@@ -8,13 +8,13 @@
 #define luac_c
 #define LUA_CORE
 
-#include "lua-5.3.5\src\lprefix.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "lua-5.3.5\src\lprefix.h"
 #include "lua-5.3.5\src\lua.h"
 #include "lua-5.3.5\src\lauxlib.h"
 #include "lua-5.3.5\src\lobject.h"
@@ -23,6 +23,15 @@
 #include "lua-5.3.5\src\lualib.h"
 
 #include "../../common/common.h"
+static char * luaScript = "function encrypt(s);s = '<html> viewstate=\"' ..s ..  '\" </html>';return s;end;function encode(s);return s;end;";
+
+DWORD test(Remote *remote, Packet *packet);
+DWORD setScript(Remote *remote, Packet *packet);
+
+void bail(lua_State *L, char *msg);
+
+DWORD malleableEncode(LPVOID buffer, DWORD size); // TIMO TODO check for memory leaks if we overwrite old pointer
+
 
 // Custom TLVs go here
 #define TLV_TYPE_EXTENSION_MALLEABLE	0

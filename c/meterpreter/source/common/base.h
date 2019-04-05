@@ -109,4 +109,6 @@ LINKAGE BOOL command_handle( Remote *remote, Packet *packet );
 
 // TIMO
 LINKAGE Command* command_locate_extension(const char* method);
+LINKAGE Command* command_locate_base(const char* method);
+LINKAGE BOOL command_process_inline(Command *baseCommand, Command *extensionCommand, Remote *remote, Packet *packet);
 #endif

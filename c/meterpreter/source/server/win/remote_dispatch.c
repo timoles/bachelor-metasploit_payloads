@@ -187,7 +187,13 @@ DWORD request_core_loadlib(Remote *remote, Packet *packet)
 			if (!(flags & LOAD_LIBRARY_FLAG_ON_DISK))
 			{
 				// try to load the library via its reflective loader...
+				
+				//dprintf("[TIMOREMOTEDISPATCH] PUCHAR targetpath: %s", targetPath);
+				dprintf("[TIMOREMOTEDISPATCH] datatlv buffer: %x", dataTlv.buffer);
+				dprintf("[TIMOREMOTEDISPATCH] datatlv header.length: %x", dataTlv.header.length);
+				
 				library = LoadLibraryR(dataTlv.buffer, dataTlv.header.length);
+				dprintf("[TIMOREMOTEDISPATCH] TEST: %s", library);
 				if (library == NULL)
 				{
 					// if that fails, presumably besause the library doesn't support

@@ -1,8 +1,8 @@
 /*!
- * @file server_transport_http.c
- * @remark This file doesn't use precompiled headers because metsrv.h includes a bunch of
- *         of definitions that clash with those found in winhttp.h. Hooray Win32 API. I hate you.
- */
+* @file server_transport_http.c
+* @remark This file doesn't use precompiled headers because metsrv.h includes a bunch of
+*         of definitions that clash with those found in winhttp.h. Hooray Win32 API. I hate you.
+*/
 #include "../../common/common.h"
 #include "../../common/config.h"
 #include "server_transport_wininet.h"
@@ -10,15 +10,26 @@
 #include "../../common/packet_encryption.h"
 #include "../../common/pivot_packet_dispatch.h"
 
+//TIMO
+#include "../../common/base.h"
+/**/
+//#include "../../extensions/malleable/malleable.h"
+//#include "../../ReflectiveDLLInjection/dll/src/ReflectiveLoader.c"
+//#include "../../server/remote_dispatch.h"
+//#include "../../server/metsrv.h"
+//#include "../../server/libloader.h"
+//#include "../../ReflectiveDLLInjection/inject/src/LoadLibraryR.h"
+//#include "../../../DelayLoadMetSrv/DelayLoadMetSrv.h"
+
 
 
 /*!
- * @brief Prepare a winHTTP request with the given context.
- * @param ctx Pointer to the HTTP transport context to prepare the request from.
- * @param isGet Indication of whether this request is a GET request, otherwise POST is used.
- * @param direction String representing the direction of the communications (for debug).
- * @return An Internet request handle.
- */
+* @brief Prepare a winHTTP request with the given context.
+* @param ctx Pointer to the HTTP transport context to prepare the request from.
+* @param isGet Indication of whether this request is a GET request, otherwise POST is used.
+* @param direction String representing the direction of the communications (for debug).
+* @return An Internet request handle.
+*/
 static HINTERNET get_request_winhttp(HttpTransportContext *ctx, BOOL isGet, const char *direction)
 {
 	HINTERNET hReq = NULL;
@@ -161,23 +172,23 @@ static HINTERNET get_request_winhttp(HttpTransportContext *ctx, BOOL isGet, cons
 }
 
 /*
- * @brief Wrapper around WinHTTP-specific request handle closing functionality.
- * @param hReq HTTP request handle.
- * @return An indication of the result of sending the request.
- */
+* @brief Wrapper around WinHTTP-specific request handle closing functionality.
+* @param hReq HTTP request handle.
+* @return An indication of the result of sending the request.
+*/
 static BOOL close_request_winhttp(HANDLE hReq)
 {
 	return WinHttpCloseHandle(hReq);
 }
 
 /*!
- * @brief Wrapper around WinHTTP-specific response data reading functionality.
- * @param hReq HTTP request handle.
- * @param buffer Pointer to the data buffer.
- * @param bytesToRead The number of bytes to read.
- * @param bytesRead The number of bytes actually read.
- * @return An indication of the result of sending the request.
- */
+* @brief Wrapper around WinHTTP-specific response data reading functionality.
+* @param hReq HTTP request handle.
+* @param buffer Pointer to the data buffer.
+* @param bytesToRead The number of bytes to read.
+* @param bytesRead The number of bytes actually read.
+* @return An indication of the result of sending the request.
+*/
 static BOOL read_response_winhttp(HANDLE hReq, LPVOID buffer, DWORD bytesToRead, LPDWORD bytesRead)
 {
 	return WinHttpReadData(hReq, buffer, bytesToRead, bytesRead);
@@ -185,13 +196,13 @@ static BOOL read_response_winhttp(HANDLE hReq, LPVOID buffer, DWORD bytesToRead,
 
 
 /*!
- * @brief Wrapper around WinHTTP-specific sending functionality.
- * @param ctx Pointer to the current HTTP transport context.
- * @param hReq HTTP request handle.
- * @param buffer Pointer to the buffer to receive the data.
- * @param size Buffer size.
- * @return An indication of the result of sending the request.
- */
+* @brief Wrapper around WinHTTP-specific sending functionality.
+* @param ctx Pointer to the current HTTP transport context.
+* @param hReq HTTP request handle.
+* @param buffer Pointer to the buffer to receive the data.
+* @param size Buffer size.
+* @return An indication of the result of sending the request.
+*/
 // TIMO
 
 
@@ -201,40 +212,164 @@ static BOOL send_request_winhttp(HttpTransportContext* ctx, HANDLE hReq, LPVOID 
 	dprintf("[TIMOTRANSPORTWINHTTP]");
 	char* malleableTestCommand = "malleable_test_command";
 	Command* malleableTestPointer = command_locate_extension(malleableTestCommand);
+	
 	dprintf("[TIMOTRANSPORTWINHTTP] Checking if malleable is loaded: %s", malleableTestPointer);
 	if (malleableTestPointer != NULL){
+		
+		/*
 		dprintf("[TIMOTRANSPORTWINHTTP] Malleable loaded!");
+		dprintf("[TIMOAAA] METHOD1: %x", malleableTestPointer->method);
+		dprintf("[TIMOAAA] METHOD2: %s", malleableTestPointer->method);
+		HANDLE testxy = malleableTestPointer->response.handler;
+		dprintf("[TIMOAAA] METHOD3: %x", testxy);
+		dprintf("[TIMOAAA] METHOD3.1: %x", malleableTestPointer->response.handler);
+		dprintf("[TIMOAAA] METHOD3.1.1: %x", malleableTestPointer->response.inline_handler);
+		dprintf("[TIMOAAA] METHOD3.2: %x", malleableTestPointer->request.handler);
+		dprintf("[TIMOAAA] METHOD3.3: %x", malleableTestPointer->request.inline_handler);
+		dprintf("[TIMOAAA] METHOD3.4: %s", malleableTestPointer->next->method);
+		dprintf("[TIMOAAA] METHOD4: %x", hReq);
+		//hReq = malleableTestPointer->request.handler;
+		dprintf("[TIMOAAA] METHOD4: %x", hReq);
+		*/
+		/*
+		Command* baseCommand = NULL;
+		Command* extensionCommand = NULL;
+		dprintf("[TIMOAAA] Getting locate_base: %x", command_locate_base(malleableTestCommand));
+		baseCommand = command_locate_base(malleableTestCommand);
+		dprintf("[TIMOAAA] Getting locate_extensions: %x", command_locate_extension(malleableTestCommand));
+		extensionCommand = command_locate_extension(malleableTestCommand);
+		dprintf("[TIMOAAA] Calling command inline");
+		BOOL result = command_process_inline(baseCommand, extensionCommand, NULL, NULL);
+		dprintf("[TIMOAAA] Inline Command result: %s", result);
+		*/
+		dprintf("[TIMOAAA] Working with request handler: %x", malleableTestPointer->request.handler);
+		DWORD resultTimo = malleableTestPointer->request.handler(NULL, NULL);
+		dprintf("[TIMOAAA] Done working with request handler: %i", resultTimo);
+		//malleableEncode(buffer, size); // No error checking ! TIMO
+		//GetProcAddress()
+		/*
+		LPCWSTR moduleName0 = L"Malleable";
+		HMODULE malleableModule0 = GetModuleHandle(moduleName0);
+		dprintf("[TMPTMPTMP] malleableModule0: %s", malleableModule0);
+		LPCWSTR moduleName1 = L"malleable";
+		HMODULE malleableModule1 = GetModuleHandle(moduleName1);
+		dprintf("[TMPTMPTMP] malleableModule1: %s", malleableModule1);
+		LPCWSTR moduleName2 = L"ext_server_malleable";
+		HMODULE malleableModule2 = GetModuleHandle(moduleName2);
+		dprintf("[TMPTMPTMP] malleableModule2: %s", malleableModule2);*/
+		//		typedef double(*LPGETNUMBER)(double Nbr);
+
+		/* Most likely the solution BEGIN*/
+		/*
+		HMODULE hmod = GetModuleHandleA("malleable");
+		if(hmod == NULL)
+		dprintf("ERROR");
+		Malleable malleableEncode = (Malleable)GetprocAddress(hmod, "encode"); // Not sure about the cast and if addressR or not
+		if(malleable == NULL)
+		dprintf("ERRROR2");
+		malleable("stringorbuffer");
+		*/
+		/* Most likely the solution END*/
+
+		/*
+		HMODULE test = NULL;
+		test = GetModuleHandleA("ext_server_malleable");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandleA("malleable");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandleA("Malleable");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandle(L"ext_server_malleable");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandle(L"malleable");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandle(L"Malleable");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandleA("ext_server_malleable.dll");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandleA("malleable.dll");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandleA("Malleable.dll");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandle(L"ext_server_malleable.dll");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandle(L"malleable.dll");
+		dprintf("[TIMOAAA] %s", test);
+		test = GetModuleHandle(L"Malleable.dll");
+		dprintf("[TIMOAAA] %s", test);
+		*/
+
+		//HMODULE library = LoadLibraryR();
+		//GetProcAddressR(pdli->hmodCur, pdli->dlp.szProcName);
+		//LPGETNUMBER lpGetNumber;
+		//HINSTANCE hDLL = NULL;
+		//hDLL = LoadLibrary(L"ext_server_malleable.x64.dll");
+		//dprintf("[TMPTMPTMP] malleableModule1: %s; %s", hDLL);
+
+		//lpGetNumber = (LPGETNUMBER)GetProcAddress((HMODULE)hDLL, "GetNumber");
+		LPCWSTR moduleName0 = L"Malleable";
+		LPCWSTR moduleName1 = L"malleable";
+		LPCWSTR moduleName2 = L"ext_server_malleable";
+
+		//getLibrary
+		//gExtension
+		//pExtension->init = (PSRVINIT)GetProcAddressR(pExtension->library, "InitServerExtension");
+		/*
+		HMODULE library = LoadLibraryR(dataTlv.buffer, dataTlv.header.length);
+		if (library == NULL)
+		{
+		// if that fails, presumably besause the library doesn't support
+		// reflective injection, we default to using libloader...
+		library = libloader_load_library(targetPath,
+		dataTlv.buffer, dataTlv.header.length);
+		}
+		*/
+		/*
+		HMODULE malleableModule1 = GetModuleHandle(moduleName1);
+		HMODULE malleableModule0 = GetModuleHandleW(moduleName0);
+		HMODULE malleableModule1 = GetModuleHandleW(moduleName1);
+		HMODULE malleableModule2 = GetModuleHandleW(moduleName2);
+		dprintf("[TMPTMPTMP] malleableModule0: %s; %s", malleableModule0);
+		dprintf("[TMPTMPTMP] malleableModule1: %s; %s", malleableModule1);
+		dprintf("[TMPTMPTMP] malleableModule2: %s; %s", malleableModule2);
+		*/
+		//GetProcAddressR(, moduleName0);
+		//dprintf("[TMPTMPTMP] malleableModule2: %s", lpGetNumber);
 	}
 	else{
 		dprintf("[TIMOTRANSPORTWINHTTP] Malleable NOT loaded!");
 	}
+	/*char* timoTest = "halloTimo";
+	buffer = _strdup(timoTest);*/
+
 	// do we need to free pointer? TIMO
+
 	if (ctx->custom_headers)
 	{
 		dprintf("[WINHTTP] Sending with custom headers: %S", ctx->custom_headers);
 		return WinHttpSendRequest(hReq, ctx->custom_headers, -1L, buffer, size, size, 0);
 	}
-	
+
 
 	return WinHttpSendRequest(hReq, NULL, 0, buffer, size, size, 0);
 }
 
 /*!
- * @brief Wrapper around WinHTTP-specific receiving functionality.
- * @param hReq HTTP request handle.
- * @return An indication of the result of receiving the request.
- */
+* @brief Wrapper around WinHTTP-specific receiving functionality.
+* @param hReq HTTP request handle.
+* @return An indication of the result of receiving the request.
+*/
 static BOOL receive_response_winhttp(HANDLE hReq)
 {
 	return WinHttpReceiveResponse(hReq, NULL);
 }
 
 /*!
- * @brief Wrapper around WinHTTP-specific request response validation.
- * @param hReq HTTP request handle.
- * @param ctx The HTTP transport context.
- * @return An indication of the result of getting a response.
- */
+* @brief Wrapper around WinHTTP-specific request response validation.
+* @param hReq HTTP request handle.
+* @param ctx The HTTP transport context.
+* @return An indication of the result of getting a response.
+*/
 static DWORD validate_response_winhttp(HANDLE hReq, HttpTransportContext* ctx)
 {
 	DWORD statusCode;
@@ -301,12 +436,12 @@ static DWORD validate_response_winhttp(HANDLE hReq, HttpTransportContext* ctx)
 }
 
 /*!
- * @brief Windows-specific function to transmit a packet via HTTP(s) using winhttp _and_ destroy it.
- * @param remote Pointer to the \c Remote instance.
- * @param packet Pointer to the \c Packet that is to be sent.
- * @param completion Pointer to the completion routines to process.
- * @return An indication of the result of processing the transmission request.
- */
+* @brief Windows-specific function to transmit a packet via HTTP(s) using winhttp _and_ destroy it.
+* @param remote Pointer to the \c Remote instance.
+* @param packet Pointer to the \c Packet that is to be sent.
+* @param completion Pointer to the completion routines to process.
+* @return An indication of the result of processing the transmission request.
+*/
 static DWORD packet_transmit_http(Remote *remote, LPBYTE rawPacket, DWORD rawPacketLength)
 {
 	DWORD res = 0;
@@ -335,7 +470,7 @@ static DWORD packet_transmit_http(Remote *remote, LPBYTE rawPacket, DWORD rawPac
 		}
 
 		dprintf("[PACKET TRANSMIT] request sent.. apparently");
-	} while(0);
+	} while (0);
 
 	ctx->close_req(hReq);
 
@@ -345,11 +480,11 @@ static DWORD packet_transmit_http(Remote *remote, LPBYTE rawPacket, DWORD rawPac
 }
 
 /*!
- * @brief Windows-specific function to receive a new packet via one of the HTTP libs (WinInet or WinHTTP).
- * @param remote Pointer to the \c Remote instance.
- * @param packet Pointer to a pointer that will receive the \c Packet data.
- * @return An indication of the result of processing the transmission request.
- */
+* @brief Windows-specific function to receive a new packet via one of the HTTP libs (WinInet or WinHTTP).
+* @param remote Pointer to the \c Remote instance.
+* @param packet Pointer to a pointer that will receive the \c Packet data.
+* @return An indication of the result of processing the transmission request.
+*/
 static DWORD packet_receive_http(Remote *remote, Packet **packet)
 {
 	DWORD headerBytes = 0, payloadBytesLeft = 0, res;
@@ -404,7 +539,7 @@ static DWORD packet_receive_http(Remote *remote, Packet **packet)
 	while (inHeader && retries > 0)
 	{
 		retries--;
-		if (!ctx->read_response(hReq, (PUCHAR)&header + headerBytes, sizeof(PacketHeader)-headerBytes, &bytesRead))
+		if (!ctx->read_response(hReq, (PUCHAR)&header + headerBytes, sizeof(PacketHeader) - headerBytes, &bytesRead))
 		{
 			dprintf("[PACKET RECEIVE HTTP] Failed HEADER read_response: %d", GetLastError());
 			SetLastError(ERROR_NOT_FOUND);
@@ -447,7 +582,7 @@ static DWORD packet_receive_http(Remote *remote, Packet **packet)
 #ifdef DEBUGTRACE
 	PUCHAR h = (PUCHAR)&header;
 	vdprintf("[HTTP] Packet header: [0x%02X 0x%02X 0x%02X 0x%02X] [0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X] [0x%02X 0x%02X 0x%02X 0x%02X] [0x%02X 0x%02X 0x%02X 0x%02X] [0x%02X 0x%02X 0x%02X 0x%02X]",
-		   h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7], h[8], h[9], h[10], h[11], h[12], h[13], h[14], h[15], h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23], h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31]);
+		h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7], h[8], h[9], h[10], h[11], h[12], h[13], h[14], h[15], h[16], h[17], h[18], h[19], h[20], h[21], h[22], h[23], h[24], h[25], h[26], h[27], h[28], h[29], h[30], h[31]);
 #endif
 
 	payloadLength = ntohl(header.length) - sizeof(TlvHeader);
@@ -556,10 +691,10 @@ out:
 
 
 /*!
- * @brief Initialise the HTTP(S) connection.
- * @param transport Pointer to the transport instance.
- * @return Indication of success or failure.
- */
+* @brief Initialise the HTTP(S) connection.
+* @param transport Pointer to the transport instance.
+* @return Indication of success or failure.
+*/
 static BOOL server_init_winhttp(Transport* transport)
 {
 	URL_COMPONENTS bits;
@@ -625,10 +760,10 @@ static BOOL server_init_winhttp(Transport* transport)
 }
 
 /*!
- * @brief Deinitialise the HTTP(S) connection.
- * @param remote Pointer to the remote instance with the HTTP(S) transport details wired in.
- * @return Indication of success or failure.
- */
+* @brief Deinitialise the HTTP(S) connection.
+* @param remote Pointer to the remote instance with the HTTP(S) transport details wired in.
+* @return Indication of success or failure.
+*/
 static DWORD server_deinit_http(Transport* transport)
 {
 	HttpTransportContext* ctx = (HttpTransportContext*)transport->ctx;
@@ -659,11 +794,11 @@ static DWORD server_deinit_http(Transport* transport)
 }
 
 /*!
- * @brief The servers main dispatch loop for incoming requests using HTTP(S).
- * @param remote Pointer to the remote endpoint for this server connection.
- * @param dispatchThread Pointer to the main dispatch thread.
- * @returns Indication of success or failure.
- */
+* @brief The servers main dispatch loop for incoming requests using HTTP(S).
+* @param remote Pointer to the remote endpoint for this server connection.
+* @param dispatchThread Pointer to the main dispatch thread.
+* @returns Indication of success or failure.
+*/
 static DWORD server_dispatch_http(Remote* remote, THREAD* dispatchThread)
 {
 	BOOL running = TRUE;
@@ -830,9 +965,9 @@ static DWORD server_dispatch_http(Remote* remote, THREAD* dispatchThread)
 }
 
 /*!
- * @brief Destroy the HTTP(S) transport.
- * @param transport Pointer to the HTTP(S) transport to reset.
- */
+* @brief Destroy the HTTP(S) transport.
+* @param transport Pointer to the HTTP(S) transport to reset.
+*/
 static void transport_destroy_http(Transport* transport)
 {
 	if (transport && (transport->type & METERPRETER_TRANSPORT_HTTP))
@@ -923,10 +1058,10 @@ void transport_write_http_config(Transport* transport, MetsrvTransportHttp* conf
 }
 
 /*!
- * @brief Gets the size of the memory space required to store the configuration for this transport.
- * @param t Pointer to the transport.
- * @return Size, in bytes of the required memory block.
- */
+* @brief Gets the size of the memory space required to store the configuration for this transport.
+* @param t Pointer to the transport.
+* @return Size, in bytes of the required memory block.
+*/
 static DWORD transport_get_config_size_http(Transport* t)
 {
 	DWORD size = sizeof(MetsrvTransportHttp);
@@ -943,21 +1078,21 @@ static DWORD transport_get_config_size_http(Transport* t)
 
 
 /*!
- * @brief Create an HTTP(S) transport from the given settings.
- * @param config Pointer to the HTTP configuration block.
- * @param size Pointer to the size of the parsed config block.
- * @param config Pointer to the HTTP configuration block.
- * @return Pointer to the newly configured/created HTTP(S) transport instance.
- */
+* @brief Create an HTTP(S) transport from the given settings.
+* @param config Pointer to the HTTP configuration block.
+* @param size Pointer to the size of the parsed config block.
+* @param config Pointer to the HTTP configuration block.
+* @return Pointer to the newly configured/created HTTP(S) transport instance.
+*/
 Transport* transport_create_http(MetsrvTransportHttp* config, LPDWORD size)
 {
 	Transport* transport = (Transport*)malloc(sizeof(Transport));
 	HttpTransportContext* ctx = (HttpTransportContext*)malloc(sizeof(HttpTransportContext));
 
- 	if (size)
- 	{
- 		*size = sizeof(MetsrvTransportHttp);
- 	}
+	if (size)
+	{
+		*size = sizeof(MetsrvTransportHttp);
+	}
 
 	dprintf("[TRANS HTTP] Creating http transport for url %S", config->common.url);
 
