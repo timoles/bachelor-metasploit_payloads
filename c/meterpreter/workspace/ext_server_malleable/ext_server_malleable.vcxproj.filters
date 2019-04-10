@@ -195,5 +195,8 @@
     <None Include="..\..\..\..\..\bachelor\lua-testing\LUA_build_testing\LUA_testing\liblua53.a">
       <Filter>LUA_3_5</Filter>
     </None>
+    <None Include="..\..\source\extensions\malleable\ee5_base64.lua">
+      <Filter>LUA_3_5</Filter>
+    </None>
   </ItemGroup>
 </Project>

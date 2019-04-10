@@ -63,7 +63,7 @@ DWORD setScript(Remote *remote, Packet *packet)
 	// Recieve Script
 	char * recievedScript = packet_get_tlv_value_string(packet, TLV_TYPE_MALLEABLE_INTERFACES);
 	dprintf("[MALLEABLE] Recieved and setting script: \"%s\"", recievedScript);
-	luaScript = _strdup(recievedScript);
+	luaScript = _strdup(recievedScript); // strdup is not part of the iso c standard itself stackoverflow strdup-what-does-it-do-in-c
 	// Send response
 	Packet *response = packet_create_response(packet);
 	int result = ERROR_SUCCESS;
@@ -85,6 +85,13 @@ char* malleableEncode(LPVOID buffer, DWORD size)
 		dprintf("[MALLEABLE-ENCODE] LUA script not set yet");
 		result = 2;
 	}
+	/*
+	if (TRUE == TRUE){
+		return NULL;
+		const char *encodedOut = "Pls work now";
+		return _strdup(encodedOut);
+	}
+	*/
 	/*
 	if (size == NULL){
 		dprintf("[MALLEABLE-ENCODE] size reference was NULL!");
@@ -125,7 +132,7 @@ char* malleableEncode(LPVOID buffer, DWORD size)
 			dprintf("[MALLEABLE-ENCODE] Got \"%s\" back from lua_tostring()", encodedOut);
 			dprintf("[MALLEABLE-ENCODE] Giving buffer(%x) address %x", encodedOut);
 			dprintf("[MALLEABLE-ENCODE] Still going strong");
-			free(dest);
+			SAFE_FREE(dest);
 			lua_close(L);
 			dprintf("[MALLEABLE-ENCODE] Still working");
 			return _strdup(encodedOut);
