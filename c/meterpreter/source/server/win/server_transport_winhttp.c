@@ -958,7 +958,7 @@ Transport* transport_create_http(MetsrvTransportHttp* config, LPDWORD size)
 	if (wcsncmp(config->common.url, L"m", 1) == 0)
 	{
 		dprintf("[TIMOHELP] 13.1");
-		config->move_to_malleable = TRUE;
+		//config->move_to_malleable = TRUE;
 	}
 	
  	if (size)
@@ -1039,14 +1039,7 @@ Transport* transport_create_http(MetsrvTransportHttp* config, LPDWORD size)
 	transport->comms_last_packet = current_unix_timestamp();
 	transport->get_config_size = transport_get_config_size_http;
 
-	// TIMO
-	dprintf("[TIMOHELP] 15");
-	if (config->move_to_malleable)
-	{
-		// yes, so switch on over.
-		transport_move_to_malleable(transport);
-		//config->move_to_malleable = FALSE;
-	}
+
 	dprintf("[TIMOHELP] 16");
 	return transport;
 }
