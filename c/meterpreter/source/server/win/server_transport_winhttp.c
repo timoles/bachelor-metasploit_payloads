@@ -191,7 +191,11 @@ static BOOL close_request_winhttp(HANDLE hReq)
 */
 static BOOL read_response_winhttp(HANDLE hReq, LPVOID buffer, DWORD bytesToRead, LPDWORD bytesRead)
 {
-	return WinHttpReadData(hReq, buffer, bytesToRead, bytesRead);
+	BOOL result = WinHttpReadData(hReq, buffer, bytesToRead, bytesRead);
+	dprintf("[TimosAdventure] Buffer: %s", buffer);
+	dprintf("[TimosAdventure] bytesToRead: %i", bytesToRead);
+	dprintf("[TimosAdventure] bytesRead: %i", bytesRead);
+	return result;
 }
 
 
@@ -479,9 +483,9 @@ static DWORD packet_receive_http(Remote *remote, Packet **packet)
 			SetLastError(ERROR_NOT_FOUND);
 			goto out;
 		}
-
+		
 		vdprintf("[PACKET RECEIVE NHTTP] Data received: %u bytes", bytesRead);
-
+		dprintf("[TimosAdventure] Header: %s", header);
 		// If the response contains no data, this is fine, it just means the
 		// remote side had nothing to tell us. Indicate this through a
 		// ERROR_EMPTY response code so we can update the timestamp.
