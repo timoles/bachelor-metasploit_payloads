@@ -625,7 +625,7 @@ DWORD command_validate_arguments(Command *command, Packet *packet)
 	{
 		TlvMetaType tlvMetaType;
 
-		// Check to see if we've reached the end of the command arguments
+		// Check to see if we've reached the end of the command argumentsco
 		if ((dispatcher->numArgumentTypes) &&
 			(commandIndex == (dispatcher->numArgumentTypes & ARGUMENT_FLAG_MASK)))
 		{
