@@ -347,7 +347,6 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(ProjectDir)..\..\output\$(PlatformSho
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\source\server\win\libloader.c" />
     <ClCompile Include="..\..\source\server\metsrv.c">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -393,7 +392,6 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(ProjectDir)..\..\output\$(PlatformSho
     <None Include="..\..\source\server\win\metsrv.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\server\libloader.h" />
     <ClInclude Include="..\..\source\server\metsrv.h" />
     <ClInclude Include="..\..\source\server\remote_dispatch.h" />
     <ClInclude Include="..\..\source\server\win\server_pivot.h" />
