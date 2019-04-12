@@ -57,6 +57,7 @@ typedef struct _MetsrvTransportHttp
 	CHARTYPE ua[256];                     ///! User agent string.
 	BYTE ssl_cert_hash[CERT_HASH_SIZE];   ///! Expected SSL certificate hash.
 	CHARTYPE custom_headers[1];           ///! Custom headers to add to outbound requests (arb length, NULL terminated).
+
 } MetsrvTransportHttp;
 
 typedef struct _MetsrvTransportTcp

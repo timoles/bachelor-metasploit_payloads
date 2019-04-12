@@ -18,6 +18,7 @@ DWORD get_migrate_context(LPDWORD contextSize, LPCOMMONMIGRATECONTEXT* contextBu
 
 DWORD create_transport_from_request(Remote* remote, Packet* packet, Transport** transportBufer)
 {
+	dprintf("[TIMOHELP] NO, IAM A PIECE OF SHIT!");
 	DWORD result = ERROR_NOT_ENOUGH_MEMORY;
 	Transport* transport = NULL;
 	wchar_t* transportUrl = packet_get_tlv_value_wstring(packet, TLV_TYPE_TRANS_URL);
@@ -196,6 +197,7 @@ DWORD remote_request_core_transport_list(Remote* remote, Packet* packet)
 			{
 				case METERPRETER_TRANSPORT_HTTP:
 				case METERPRETER_TRANSPORT_HTTPS:
+				case METERPRETER_TRANSPORT_HTTP_MALLEABLE: // TIMO
 				{
 					HttpTransportContext* ctx = (HttpTransportContext*)current->ctx;
 					dprintf("[DISPATCH] Transport is HTTP/S");

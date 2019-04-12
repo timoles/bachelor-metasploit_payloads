@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\source\server\win\libloader.c" />
     <ClCompile Include="..\..\source\server\metsrv.c" />
     <ClCompile Include="..\..\source\server\win\remote_dispatch.c" />
     <ClCompile Include="..\..\source\server\remote_dispatch_common.c" />
@@ -24,9 +23,12 @@
     <ClCompile Include="..\..\source\server\win\server_transport_named_pipe.c">
       <Filter>transports</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\server\win\libloader.c" />
+    <ClCompile Include="..\..\source\server\win\server_transport_winhttp_malleable.c">
+      <Filter>transports</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\source\server\libloader.h" />
     <ClInclude Include="..\..\source\server\metsrv.h" />
     <ClInclude Include="..\..\source\server\remote_dispatch.h" />
     <ClInclude Include="..\..\source\server\win\server_transport_winhttp.h">
@@ -45,6 +47,10 @@
       <Filter>pivots</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\server\win\server_transport_named_pipe.h">
+      <Filter>transports</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\libloader.h" />
+    <ClInclude Include="..\..\source\server\win\server_transport_winhttp_malleable.h">
       <Filter>transports</Filter>
     </ClInclude>
   </ItemGroup>

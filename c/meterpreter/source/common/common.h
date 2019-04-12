@@ -59,6 +59,11 @@ typedef struct ___u128 {
 #define METERPRETER_TRANSPORT_HTTPS  (0x4 | METERPRETER_TRANSPORT_HTTP)
 /*! @brief Indication that the Meterpreter transport is using  named pipes. */
 #define METERPRETER_TRANSPORT_PIPE   0x8
+// TIMO
+/*! @brief Indication that the Meterpreter transport is using HTTP MALLEABLE. */
+#define METERPRETER_TRANSPORT_HTTP_MALLEABLE   0x26
+/*! @brief Indication that the Meterpreter transport is using HTTPS MALLEABLE. */
+#define METERPRETER_TRANSPORT_HTTPS_MALLEABLE  (0x28 | METERPRETER_TRANSPORT_HTTP_MALLEABLE)
 
 VOID sleep(DWORD seconds);
 

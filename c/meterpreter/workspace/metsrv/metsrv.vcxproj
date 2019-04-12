@@ -233,9 +233,11 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(ProjectDir)..\..\output\$(PlatformSho
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <PrecompiledHeaderFile>metsrv.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(OutDir)\metsrv.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(OutDir)\</AssemblerListingLocation>
       <ObjectFileName>$(OutDir)\</ObjectFileName>
       <ProgramDataBaseFileName>$(OutDir)\</ProgramDataBaseFileName>
@@ -380,6 +382,7 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(ProjectDir)..\..\output\$(PlatformSho
       <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='r7_release|x64'">
       </PrecompiledHeaderOutputFile>
     </ClCompile>
+    <ClCompile Include="..\..\source\server\win\server_transport_winhttp_malleable.c" />
     <ClCompile Include="..\..\source\server\win\server_transport_wininet.c" />
   </ItemGroup>
   <ItemGroup>
@@ -394,6 +397,7 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(ProjectDir)..\..\output\$(PlatformSho
     <ClInclude Include="..\..\source\server\win\server_transport_named_pipe.h" />
     <ClInclude Include="..\..\source\server\win\server_transport_tcp.h" />
     <ClInclude Include="..\..\source\server\win\server_transport_winhttp.h" />
+    <ClInclude Include="..\..\source\server\win\server_transport_winhttp_malleable.h" />
     <ClInclude Include="..\..\source\server\win\server_transport_wininet.h" />
   </ItemGroup>
   <ItemGroup>

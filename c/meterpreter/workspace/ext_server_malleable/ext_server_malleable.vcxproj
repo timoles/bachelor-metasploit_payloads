@@ -356,7 +356,6 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(ProjectDir)..\..\output\$(PlatformSho
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\..\bachelor\lua-testing\LUA_build_testing\LUA_testing\liblua53.a" />
     <None Include="..\..\source\extensions\malleable\ee5_base64.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
