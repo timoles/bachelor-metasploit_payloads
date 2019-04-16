@@ -492,6 +492,7 @@ static DWORD packet_transmit_http_malleable(Remote *remote, LPBYTE rawPacket, DW
 */
 static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 {
+	dprintf("[TIMOHELP] PLS SEND HELP ");
 	DWORD headerBytes = 0, payloadBytesLeft = 0, res;
 	Packet *localPacket = NULL;
 	PacketHeader header;
@@ -604,34 +605,35 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 		testCurrentPayloadSize += 1; // Add the size for the terminator, because the chunkSize (we added earlier) does not account for that
 	}
 	dprintf("[TIMOHELP] 320");
-	//dprintf("[TIMOHELP] 321 Packetbuffer: %S", malleablePacketBuffer);
-	//dprintf("[TIMOHELP] 322");
-	goto out;
+	dprintf("[TIMOHELP] 321 Packetbuffer: %s", (PUCHAR)testPayload);
+	dprintf("[TIMOHELP] 322");
+
+	//goto out;
 	
-
-
-
-
-
-
-
-
-
 
 
 	// Read the packet length
 	retries = 3;
 	vdprintf("[PACKET RECEIVE HTTP MALLEABLE] Start looping through the receive calls");
+	
+	memcpy_s((PUCHAR)&header, sizeof(PacketHeader), testPayload, sizeof(PacketHeader)); // Timo added
+	//dprintf("[TIMOHELP---------------------]-2");
+	//dprintf("[TIMOHELP---------------------] %s", header);
+	dprintf("[TIMOHELP---------------------]-1");
+	if (TRUE) // TIMO
 	while (inHeader && retries > 0)
 	{
+		bytesRead = 0;
 		retries--;
+		/*
 		if (!ctx->read_response(hReq, (PUCHAR)&header + headerBytes, sizeof(PacketHeader) - headerBytes, &bytesRead))
 		{
 			dprintf("[PACKET RECEIVE HTTP MALLEABLE] Failed HEADER read_response: %d", GetLastError());
 			SetLastError(ERROR_NOT_FOUND);
+			break; // TIMO
 			goto out;
 		}
-
+		*/
 		vdprintf("[PACKET RECEIVE NHTTP MALLEABLE] Data received: %u bytes", bytesRead);
 
 		// If the response contains no data, this is fine, it just means the
@@ -639,26 +641,34 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 		// ERROR_EMPTY response code so we can update the timestamp.
 		if (bytesRead == 0)
 		{
+			break; // TIMO
+			dprintf("[TIMOHELP---------------------]0 bytes read == 0");
 			SetLastError(ERROR_EMPTY);
+			
 			goto out;
 		}
 
 		headerBytes += bytesRead;
-
+		
 		if (headerBytes != sizeof(PacketHeader))
 		{
-			continue;
+			break; // TIMO
+			continue; 
 		}
 
 		inHeader = FALSE;
-	}
-
+	};
+	
+	dprintf("[TIMOHELP---------------------]1");
+	headerBytes = sizeof(PacketHeader); // TIMO
+	
 	if (headerBytes != sizeof(PacketHeader))
 	{
 		dprintf("[PACKET RECEIVE HTTP MALLEABLE] headerBytes not valid");
 		SetLastError(ERROR_NOT_FOUND);
 		goto out;
 	}
+	dprintf("[TIMOHELP---------------------]2");
 
 	dprintf("[PACKET RECEIVE HTTP MALLEABLE] decoding header");
 	PacketHeader encodedHeader;
@@ -693,6 +703,10 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 
 	// Read the payload
 	retries = payloadBytesLeft;
+	dprintf("[TIMOHELP---------------------]3");
+	memcpy_s(payload, payloadLength, testPayload + testCurrentPayloadSize, payloadLength); // TIMO
+	dprintf("[TIMOHELP---------------------]4");
+	/*
 	while (payloadBytesLeft > 0 && retries > 0)
 	{
 		vdprintf("[PACKET RECEIVE HTTP MALLEABLE] reading more data from the body...");
@@ -720,6 +734,7 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 	{
 		goto out;
 	}
+	*/
 
 #ifdef DEBUGTRACE
 	h = (PUCHAR)&header.session_guid[0];
