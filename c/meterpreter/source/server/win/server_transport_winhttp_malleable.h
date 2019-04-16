@@ -18,7 +18,7 @@
 #include "lua-5.3.5\src\lundump.h"
 #include "lua-5.3.5\src\lualib.h"
 
-static char * luaScript = "function encode(s);s = '<html> viewstate=\"' .. s ..  '\" </html>';return s;end;";
+static char * luaScript = "function decode(s);return s;end;function encode(s);return s;end;";
 
 void transport_write_http_malleable_config(Transport* transport, MetsrvTransportHttp* config);
 Transport* transport_create_http_malleable(MetsrvTransportHttp* httpConfig, LPDWORD size);

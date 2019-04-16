@@ -17,7 +17,8 @@ void bail(lua_State *L, char *msg){
 	dprintf("[MALLEABLE-FATAL-LUA] FATAL ERROR:  %s: %s",
 		msg, lua_tostring(L, -1));
 }
-char* malleableEncode(LPVOID buffer, DWORD size)
+
+char* malleableEncode(LPVOID buffer, DWORD* size)
 {
 	dprintf("[MALLEABLE-ENCODE] Malleable encode start");
 	BOOL result = ERROR_SUCCESS;
@@ -68,11 +69,19 @@ char* malleableEncode(LPVOID buffer, DWORD size)
 		dprintf("[MALLEABLE-ENCODE] LUA getglobal");
 		lua_getglobal(L, "encode");
 		dprintf("[MALLEABLE-ENCODE] LUA pushlstring");
-		dprintf("[MALLEABLE-ENCODE] LUA pushlstring %s", lua_pushlstring(L, buffer, (size_t)size)); // casting without checking!
+		size_t testSize = (size_t)*size;
+		dprintf("[MALLEABLE-ENCODE] LUA pushlstring %s", lua_pushlstring(L, buffer, (size_t)testSize)); // casting without checking!
 		dprintf("[MALLEABLE-ENCODE] lua_pcall() (encode)");
 		if (lua_pcall(L, 1, 1, 0))
 			bail(L, "lua_pcall() failed");
-		const char *encodedOut = lua_tostring(L, -1);
+		dprintf("[MALLEABLE-ENCODE] lua_pcall() (encode)");
+		size_t tmpLen = 1;
+		dprintf("[MALLEABLE-ENCODETTTTTTTTTTTTTTT] size: %i", tmpLen);
+		const char *encodedOut = luaL_tolstring(L, -1, &tmpLen);
+		dprintf("[MALLEABLE-ENCODE] TESTTESTTEST");
+		dprintf("[MALLEABLE-ENCODETTTTTTTTTTTTTTT] size: %i", tmpLen);
+		*size = (DWORD)tmpLen;
+		dprintf("[MALLEABLE-ENCODE] TESTTESTTEST");
 		dprintf("[MALLEABLE-ENCODE] Got \"%s\" back from lua_tostring()", encodedOut);
 		dprintf("[MALLEABLE-ENCODE] Giving buffer(%x) address %x", encodedOut);
 		dprintf("[MALLEABLE-ENCODE] Still going strong");
@@ -86,6 +95,7 @@ char* malleableEncode(LPVOID buffer, DWORD size)
 	dprintf("[MALLEABLE-ENCODE] Malleable encode end");
 	return NULL;
 }
+
 char* malleableDecode(LPVOID buffer, DWORD size)
 {
 	dprintf("[MALLEABLE-DECODE] Malleable decode start");
@@ -339,13 +349,31 @@ static BOOL read_response_winhttp_malleable(HANDLE hReq, LPVOID buffer, DWORD by
 */
 static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hReq, LPVOID buffer, DWORD size)
 {
+	dprintf("[WINHTTP MALLEABLE] Starting sendrequest; size: %i. buffer: %s",size, buffer);
+	BOOL result;
+	if (buffer != NULL)
+	{
+		// Create copy of buffer
+		LPVOID encodedBuffer = malleableEncode(buffer, &size);
+		dprintf("[WINHTTP MALLEABLE] Got size from malleableEncoded: size: %i", size);
+		if (encodedBuffer == NULL)
+		{
+			dprintf("[WINHTTP MALLEABLE] Error during malleableEncode, encodedBuffer == NULL !");
+			return FALSE;
+		}
+		SAFE_FREE(buffer);
+		buffer = encodedBuffer;
+		//size = (DWORD)strlen(encodedBuffer) + 1;
+		encodedBuffer = NULL;
+	}
 	if (ctx->custom_headers)
 	{
 		dprintf("[WINHTTP MALLEABLE] Sending with custom headers: %S", ctx->custom_headers);
 		return WinHttpSendRequest(hReq, ctx->custom_headers, -1L, buffer, size, size, 0);
 	}
-
-	return WinHttpSendRequest(hReq, NULL, 0, buffer, size, size, 0);
+	dprintf("[WINHTTP MALLEABLE] Sending out request. Size: %i. Buffer: %s",size, buffer);
+	result = WinHttpSendRequest(hReq, NULL, 0, buffer, size, size, 0);
+	return result;
 }
 
 /*!
@@ -617,9 +645,7 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 		} while (malleablePacketChunkSize > 0);
 		testCurrentPayloadSize += 1; // Add the size for the terminator, because the chunkSize (we added earlier) does not account for that
 	}
-	dprintf("[TIMOHELP] 320");
-	dprintf("[TIMOHELP] 321 Packetbuffer: %s", (PUCHAR)testPayload);
-	dprintf("[TIMOHELP] 322");
+
 
 	//goto out;
 	// If the response contains no data, this is fine, it just means the
@@ -631,11 +657,11 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 		SetLastError(ERROR_EMPTY);
 		goto out;
 	}
-	else
-	{
-		//dprintf("[TIMOHELP---------------------]0.1 read something , continue");
-	}
-
+	dprintf("[TIMOHELP] 320");
+	dprintf("[TIMOHELP] 321.0 Packetbuffer: %s", (PUCHAR)testPayload);
+	malleableDecode(testPayload, testCurrentPayloadSize);
+	dprintf("[TIMOHELP] 321.1 Packetbuffer: %s", (PUCHAR)testPayload);
+	dprintf("[TIMOHELP] 322");
 
 	// Read the packet length
 	retries = 3;
