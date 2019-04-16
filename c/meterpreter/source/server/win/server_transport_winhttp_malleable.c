@@ -391,11 +391,14 @@ static DWORD validate_response_winhttp_malleable(HANDLE hReq, HttpTransportConte
 			// If we fail, we're going to fallback to WinINET and see if that works instead.
 			// there could be a number of reasons for failure, but we're only going to try
 			// to handle the case where proxy authentication fails. We'll indicate failure and
-			// let the switchover happen for us.
+			// let the switchover happen for us.			
 
 			// However, we won't do this in the case where cert hash verification is turned on,
 			// because we don't want to expose people to MITM if they've explicitly asked us not
 			// to.
+
+			// TIMO check out these failure cases with malleable
+
 			if (ctx->cert_hash == NULL && statusCode == 407)
 			{
 				return ERROR_WINHTTP_CANNOT_CONNECT;
@@ -492,6 +495,8 @@ static DWORD packet_transmit_http_malleable(Remote *remote, LPBYTE rawPacket, DW
 */
 static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 {
+	// TIMO TODO SPEICHERLECKS UND CODE CLEANUP 
+
 	dprintf("[TIMOHELP] PLS SEND HELP ");
 	DWORD headerBytes = 0, payloadBytesLeft = 0, res;
 	Packet *localPacket = NULL;
@@ -559,8 +564,10 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 	*/
 //	memcpy_s(testPacketBuffer, sizeof(PacketHeader), (LPBYTE)&encodedHeader, sizeof(PacketHeader));
 	dprintf("[TIMOHELP] 300");
-	LPBYTE testPayload = NULL; 
+	LPBYTE testPayload = NULL;
 	dprintf("[TIMOHELP] 301");
+	malleablePacketBytesRead = 0; // Setting 0 to avoid memory fault (see winhttp docs)
+	BOOL readSomething = FALSE;
 	if (hReq)
 	{
 		do
@@ -574,6 +581,10 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 				dprintf("[PACKET RECEIVE HTTP MALLEABLE] Failedto query available data: %d", GetLastError());
 				SetLastError(ERROR_NOT_FOUND); // TODO create extra error code
 				goto out;
+			}
+			if (malleablePacketChunkSize > 0)
+			{
+				readSomething = TRUE;
 			}
 			// We got the new chunksize so we allocate additional memory in our testPayload
 			//dprintf("[TIMOHELP] 303");
@@ -589,7 +600,7 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 			testPayload = testTmpPayload;
 			//dprintf("[TIMOHELP] 306");
 			// Ready to read and append the data to our testPayload
-			malleablePacketBytesRead = 0; // Setting 0 to avoid memory fault (see winhttp docs)
+			
 			//dprintf("[TIMOHELP] 307");
 			if (!ctx->read_response(hReq, testPayload + testCurrentPayloadSize, malleablePacketChunkSize, &malleablePacketBytesRead)) // TIMO hier
 			{
@@ -597,6 +608,8 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 				SetLastError(ERROR_NOT_FOUND);
 				goto out;
 			}
+			// TODO TIMO I think we loop one time to often through this loop
+
 			// Everything done, lets increase our payload tracker and continue
 			//dprintf("[TIMOHELP] 308");
 			testCurrentPayloadSize += malleablePacketChunkSize;
@@ -609,7 +622,19 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 	dprintf("[TIMOHELP] 322");
 
 	//goto out;
-	
+	// If the response contains no data, this is fine, it just means the
+	// remote side had nothing to tell us. Indicate this through a
+	// ERROR_EMPTY response code so we can update the timestamp.
+	if (readSomething == FALSE)
+	{
+		dprintf("[TIMOHELP---------------------]0.0 didn't read anything goto out");
+		SetLastError(ERROR_EMPTY);
+		goto out;
+	}
+	else
+	{
+		//dprintf("[TIMOHELP---------------------]0.1 read something , continue");
+	}
 
 
 	// Read the packet length
@@ -634,7 +659,7 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 			goto out;
 		}
 		*/
-		vdprintf("[PACKET RECEIVE NHTTP MALLEABLE] Data received: %u bytes", bytesRead);
+		//vdprintf("[PACKET RECEIVE NHTTP MALLEABLE] Data received: %u bytes", bytesRead);
 
 		// If the response contains no data, this is fine, it just means the
 		// remote side had nothing to tell us. Indicate this through a
@@ -704,7 +729,7 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 	// Read the payload
 	retries = payloadBytesLeft;
 	dprintf("[TIMOHELP---------------------]3");
-	memcpy_s(payload, payloadLength, testPayload + testCurrentPayloadSize, payloadLength); // TIMO
+	memcpy_s(payload, payloadLength, testPayload + sizeof(PacketHeader), payloadLength); // TIMO
 	dprintf("[TIMOHELP---------------------]4");
 	/*
 	while (payloadBytesLeft > 0 && retries > 0)
