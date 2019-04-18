@@ -1305,8 +1305,7 @@ Transport* transport_create_http_malleable(MetsrvTransportHttp* config, LPDWORD 
 	{
 		*size = sizeof(MetsrvTransportHttp);
 	}
-	dprintf("[TIMOHELP] 200 Please dont break"); // Timo Remove the leading  "m"
-	//config->common.url = _wcsdup(config->common.url);; // TIMO i don't knowif this is a good thing or if I'm loosing memory
+	dprintf("[TIMOHELP] 200 Please dont break"); 
 	dprintf("[TIMOHELP] 200.5 Still works");
 	
 	dprintf("[TRANS HTTP MALLEABLE] Creating http transport for url %S", config->common.url);
@@ -1315,6 +1314,9 @@ Transport* transport_create_http_malleable(MetsrvTransportHttp* config, LPDWORD 
 	dprintf("[TIMOHELP] 200.7 Still works");
 	memset(ctx, 0, sizeof(HttpTransportContext));
 	dprintf("[TIMOHELP] 200.8 Still works");
+	
+//	dprintf("[TRANS HTTP MALLEABLE-----] Given LUA script: %S", config->malleable_script);
+	dprintf("[TIMOHELP] 200.9 Still works");
 
 	dprintf("[TRANS HTTP MALLEABLE] Given ua: %S", config->ua);
 	if (config->ua[0])
@@ -1384,12 +1386,20 @@ Transport* transport_create_http_malleable(MetsrvTransportHttp* config, LPDWORD 
 	memset(modifiedUrl, 0, URL_SIZE);
 	//STRTYPE modifiedUrl = malloc(URL_SIZE); // Copy URL without leading m
 	dprintf("[TIMOHELP] 110.2 about to copy url: %S", config->common.url);
+	int replacementPos = 3; // Normally the "m" is on the 4th position
+	if (wcsncmp(config->common.url, L"httpsm", 6) != 0) // Unless we have https
+		replacementPos = 4;
+
 	for (int i = 0; i < URL_SIZE-1; i++){
-		modifiedUrl[i] = config->common.url[i+1];
+		if (i < replacementPos)
+		{
+			modifiedUrl[i] = config->common.url[i]; // Copy the URL without a deviation of 1 until we reach the unwanted "m"
+			continue;
+		}
+		modifiedUrl[i] = config->common.url[i + 1];
 	}
 	dprintf("[TIMOHELP] 110.3 Url: %S", modifiedUrl);
 	
-	dprintf("[TIMOHELP] 110.3 ");
 	//CHARTYPE modifiedUrl = _wcsdup(modifiedUrl);
 	//dprintf("[TIMOHELP] 110.3.1 Url: %S", modifiedUrl);
 	//dprintf("[TIMOHELP] 110.3.2 Url: %S", config->common.url[9]);

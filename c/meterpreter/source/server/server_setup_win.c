@@ -121,7 +121,7 @@ static Transport* create_transport(Remote* remote, MetsrvTransportCommon* transp
 	{
 		transport = transport_create_named_pipe((MetsrvTransportNamedPipe*)transportCommon, size);
 	}
-	else if (wcsncmp(transportCommon->url, L"mhttp", 5) == 0) // TIMO
+	else if (wcsncmp(transportCommon->url, L"httpm", 5) == 0 || wcsncmp(transportCommon->url, L"httpsm", 6) == 0) // TIMO
 	{
 		dprintf("[TIMOHELP] 19.8");
 		//memmove(transportCommon->url, transport->url++, strlen(transport->url));

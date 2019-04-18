@@ -41,6 +41,8 @@ typedef struct _MetsrvTransportCommon
 	int comms_timeout;                    ///! Number of sessions to wait for a new packet.
 	int retry_total;                      ///! Total seconds to retry comms for.
 	int retry_wait;                       ///! Seconds to wait between reconnects.
+	
+	//BOOL testTimo; // TIMO TEST TODO
 } MetsrvTransportCommon;
 
 typedef struct _MetsrvTransportProxy
@@ -55,10 +57,12 @@ typedef struct _MetsrvTransportHttp
 	MetsrvTransportCommon common;
 	MetsrvTransportProxy proxy;
 	CHARTYPE ua[256];                     ///! User agent string.
+	//CHARTYPE malleable_script[256];                     ///! TIMO
 	BYTE ssl_cert_hash[CERT_HASH_SIZE];   ///! Expected SSL certificate hash.
 	CHARTYPE custom_headers[1];           ///! Custom headers to add to outbound requests (arb length, NULL terminated).
 	
-	BOOL move_to_malleable;   ///! TIMO Expected SSL certificate hash.
+	//char* malleable_script; //! TIMO do this dynamic or something like that TODO
+	//BOOL move_to_malleable;   ///! TIMO 
 } MetsrvTransportHttp;
 
 typedef struct _MetsrvTransportTcp
