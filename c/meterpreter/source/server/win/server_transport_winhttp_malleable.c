@@ -408,7 +408,12 @@ static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hRe
 		encodedBuffer = malleableEncode(buffer, &size);
 		//malleableEncode(buffer, &size);
 		dprintf("[WINHTTP MALLEABLE] Buffer address end: %x", buffer);
-		return  WinHttpSendRequest(hReq, NULL, 0, buffer, size, size, 0); // TODO nach hier noch fehler drinnen
+		dprintf("[WINHTTP MALLEABLE] -------Sending out request. Size: %i. Buffer: %s", size, buffer);
+		dprintf("[WINHTTP MALLEABLE] -------Sending out request. Strlen: %i", strlen(encodedBuffer));
+		result = WinHttpSendRequest(hReq, NULL, 0, encodedBuffer, size, size, 0); // TODO nach hier noch fehler drinnen
+		SAFE_FREE(encodedBuffer);
+		return result;
+		/* TODO need to delete
 		dprintf("[WINHTTP MALLEABLE] Got size from malleableEncoded: size: %i", size);
 		if (encodedBuffer == NULL)
 		{
@@ -427,7 +432,7 @@ static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hRe
 		{
 			dprintf("[WINHTTP MALLEABLE] Error during Buffer realloc");
 			return FALSE;
-		}
+		}*/
 	}
 	if (ctx->custom_headers)
 	{
