@@ -13,6 +13,7 @@
 #define PROXY_HOST_SIZE 128
 #define PROXY_USER_SIZE 64
 #define PROXY_PASS_SIZE 64
+#define MALLEABLE_SCRIPT_SIZE 4096
 
 typedef wchar_t CHARTYPE;
 
@@ -56,8 +57,8 @@ typedef struct _MetsrvTransportHttp
 {
 	MetsrvTransportCommon common;
 	MetsrvTransportProxy proxy;
-	CHARTYPE ua[256];                     ///! User agent string.
-	//CHARTYPE malleable_script[256];                     ///! TIMO
+	CHARTYPE ua[UA_SIZE];                     ///! User agent string.
+	CHARTYPE malleable_script[MALLEABLE_SCRIPT_SIZE];	  ///! TIMO
 	BYTE ssl_cert_hash[CERT_HASH_SIZE];   ///! Expected SSL certificate hash.
 	CHARTYPE custom_headers[1];           ///! Custom headers to add to outbound requests (arb length, NULL terminated).
 	

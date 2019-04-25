@@ -59,7 +59,8 @@ PUCHAR malleableEncode(LPVOID buffer, DWORD* size)
 		lua_State *L;
 		L = luaL_newstate();                        /* Create Lua state variable */
 		luaL_openlibs(L);                           /* Load Lua libraries */
-		dprintf("[MALLEABLE] luaL_loadstring(): script: \"%s\"", luaScript);
+		//dprintf("[MALLEABLE] luaL_loadstring(): script: \"%s\"", luaScript);
+		//dprintf("[TIMOHELP] 777.1 luaScript %S", luaScript);
 		if (luaL_loadstring(L, luaScript)) /* Load but don't run the Lua scripnt */
 			bail(L, "luaL_loadstring() failed");      /* Error out if file can't be read */
 		dprintf("[MALLEABLE-ENCODE] lua_pcall(0,0,0) (init)");
@@ -152,7 +153,8 @@ LPBYTE malleableDecode(LPVOID buffer, DWORD* size)
 		lua_State *L;
 		L = luaL_newstate();                        /* Create Lua state variable */
 		luaL_openlibs(L);                           /* Load Lua libraries */
-		dprintf("[MALLEABLE] luaL_loadstring(): script: \"%s\"", luaScript);
+		//dprintf("[MALLEABLE] luaL_loadstring(): script: \"%s\"", luaScript);
+		//dprintf("[TIMOHELP] 888.1 luaScript %S", luaScript);
 		if (luaL_loadstring(L, luaScript)) /* Load but don't run the Lua scripnt */
 			bail(L, "luaL_loadstring() failed");      /* Error out if file can't be read */
 		dprintf("[MALLEABLE-DECODE] lua_pcall(0,0,0) (init)");
@@ -197,6 +199,13 @@ LPBYTE malleableDecode(LPVOID buffer, DWORD* size)
 		{
 			dprintf("[MALLEABLE-DECODE] ERROR decodedOut == NULL");
 		}
+		
+		if ( strcmp( decodedOut, "") == 0)
+		{
+			decodedOut = NULL;
+			*size = 0;
+		}
+		
 		return decodedOut;
 		//}
 	}
@@ -399,7 +408,7 @@ static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hRe
 		encodedBuffer = malleableEncode(buffer, &size);
 		//malleableEncode(buffer, &size);
 		dprintf("[WINHTTP MALLEABLE] Buffer address end: %x", buffer);
-		return  WinHttpSendRequest(hReq, NULL, 0, buffer, size, size, 0);
+		return  WinHttpSendRequest(hReq, NULL, 0, buffer, size, size, 0); // TODO nach hier noch fehler drinnen
 		dprintf("[WINHTTP MALLEABLE] Got size from malleableEncoded: size: %i", size);
 		if (encodedBuffer == NULL)
 		{
@@ -1316,6 +1325,13 @@ Transport* transport_create_http_malleable(MetsrvTransportHttp* config, LPDWORD 
 	dprintf("[TIMOHELP] 200.8 Still works");
 	
 //	dprintf("[TRANS HTTP MALLEABLE-----] Given LUA script: %S", config->malleable_script);
+	if (config->malleable_script[0])
+	{
+		wcstombs(luaScript, config->malleable_script, MALLEABLE_SCRIPT_SIZE);
+		//wcstombs_s(NULL, luaScript, sizeof(luaScript), config->malleable_script, sizeof(luaScript)); // TODO erno
+		//luaScript = (char*)(config->malleable_script); // TODO TIMO include in ctx? also probably cancel if we don't have a script
+	}
+	dprintf("[TIMOHELP] 200.89 luaScript %S", luaScript);
 	dprintf("[TIMOHELP] 200.9 Still works");
 
 	dprintf("[TRANS HTTP MALLEABLE] Given ua: %S", config->ua);
@@ -1339,20 +1355,20 @@ Transport* transport_create_http_malleable(MetsrvTransportHttp* config, LPDWORD 
 		ctx->proxy_pass = _wcsdup(config->proxy.password);
 	}
 	ctx->ssl = wcsncmp(config->common.url, L"https", 5) == 0;
-	dprintf("[TIMOHELP] 108 custom_headers hello? %x", config->custom_headers);
+	//dprintf("[TIMOHELP] 108 custom_headers hello? %x", config->custom_headers);
 	if (config->custom_headers[0])
 	{
-		dprintf("[TIMOHELP] 108.1");
+		//dprintf("[TIMOHELP] 108.1");
 		ctx->custom_headers = _wcsdup(config->custom_headers);
-		dprintf("[TIMOHELP] 108.2");
+		//dprintf("[TIMOHELP] 108.2");
 		if (size)
 		{
-			dprintf("[TIMOHELP] 108.3");
+			//dprintf("[TIMOHELP] 108.3");
 			*size += (DWORD)wcslen(ctx->custom_headers) * sizeof(ctx->custom_headers[0]);
-			dprintf("[TIMOHELP] 108.4");
+			//dprintf("[TIMOHELP] 108.4");
 		}
 	}
-	dprintf("[TIMOHELP] 109");
+	//dprintf("[TIMOHELP] 109");
 	dprintf("[SERVER MALLEABLE] Received HTTPS Hash: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
 		config->ssl_cert_hash[0], config->ssl_cert_hash[1], config->ssl_cert_hash[2], config->ssl_cert_hash[3],
 		config->ssl_cert_hash[4], config->ssl_cert_hash[5], config->ssl_cert_hash[6], config->ssl_cert_hash[7],

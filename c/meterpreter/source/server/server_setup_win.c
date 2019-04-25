@@ -88,10 +88,31 @@ VOID load_stageless_extensions(Remote* remote, MetsrvExtension* stagelessExtensi
 	}
 	dprintf("[TIMOHELP] 44");
 	dprintf("[SERVER] All stageless extensions loaded");
-
+	dprintf("[TIMOHELP] 44.1 stagelessExtensions->size %x", stagelessExtensions->size);
+	dprintf("[TIMOHELP] 44.15 &stagelessExtensions->size %x", &stagelessExtensions->size);
+	dprintf("[TIMOHELP] 44.2 sizeof(stagelessExtensions->size %i", sizeof(stagelessExtensions->size));
 	// once we have reached the end, we may have extension initializers
 	LPBYTE initData = (LPBYTE)(&stagelessExtensions->size) + sizeof(stagelessExtensions->size);
-
+	dprintf("[TIMOHELP] 44.2 initdata: %x", initData);
+	dprintf("[TIMOHELP] 44.3 *initdata-9: %i", *(initData - 9));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData - 8));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData - 7));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData - 6));
+	dprintf("[TIMOHELP] 44.3 *initdata-5: %i", *(initData - 5));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData - 4));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData-3));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData-2));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData-1));
+	dprintf("[TIMOHELP] 44.3 *initdata0: %i", *(initData+0));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData+1));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData+2));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData + 3));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData + 4));
+	dprintf("[TIMOHELP] 44.3 *initdata5: %i", *(initData + 5));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData + 6));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData + 7));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData + 8));
+	dprintf("[TIMOHELP] 44.3 *initdata9: %i", *(initData + 9));
 	while (initData != NULL && *initData != '\0')
 	{
 		const char* extensionName = (const char*)initData;
