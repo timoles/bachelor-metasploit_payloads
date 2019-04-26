@@ -12,74 +12,71 @@
 #include "server_transport_winhttp_malleable.h"
 
 
-// TIMO needs doc-comments
-void bail(lua_State *L, char *msg){
+/*!
+* @brief Retrieve LUA errors from the stack and debug print them
+* @param Lua state in which the error occurred 
+* @param Aditional error message to be printed
+*/
+void bail(lua_State *L, char *msg){ // TODO change this method name
 	dprintf("[MALLEABLE-FATAL-LUA] FATAL ERROR:  %s: %s",
 		msg, lua_tostring(L, -1));
+		lua_close(L); // TODO check if this lua_close works properly
 }
 
+/*!
+* @brief Wrapper which takes a given buffer, takes it contents and processes the buffer content with LUA
+* @param Pointer to a buffer
+* @param Buffer size
+* @return PUCHAR which includes the retunred data from the LUA script
+*/
 PUCHAR malleableEncode(LPVOID buffer, DWORD* size)
 {
 	dprintf("[MALLEABLE-ENCODE] Malleable encode start");
-	BOOL result = ERROR_SUCCESS;
+	
+	//LONG result = ERROR_SUCCESS;
+	LONG result = ERROR_SUCCESS;
 	if (buffer == NULL){
 		dprintf("[MALLEABLE-ENCODE] Buffer reference was NULL!");
-		result = 1; // TODO real error code 
+		result = ERROR_MALLEABLE_BUFFER_NULL; // TODO real error code 
 	}
 	if (!strcmp(luaScript, "")){
 		dprintf("[MALLEABLE-ENCODE] LUA script not set yet");
-		result = 2;
+		result = ERROR_MALLEABLE_LUA_SCRIPT_EMPTY;
 	}
-	/*
-	if (TRUE == TRUE){
-	return NULL;
-	const char *encodedOut = "Pls work now";
-	return _strdup(encodedOut);
-	}
-	*/
-	/*
-	if (size == NULL){
-	dprintf("[MALLEABLE-ENCODE] size reference was NULL!");
-	result = ERROR; // TODO real error code
-	}
-	*/
-	if (result == ERROR_SUCCESS){
-		dprintf("[MALLEABLE-ENCODE] Starting buffer stuff");
-		dprintf("[MALLEABLE-ENCODE] Size: %i", size);
-		//void *dest = malloc((size_t)size + 1); // i think need to free data mby +1 needs to go away 
-		//strcpy_s((const char*)data, (size_t)size, (char*) buffer); //mby manually null terminate
-		// this things is probalby terminating on null bytes, we dont wan't that we want to copy everything!
 
-		//strncpy_s((char*)dest, (size_t)size + 1, (char*)buffer, (size_t)size - 1);
-		//dprintf("[MALLEABLE-ENCODE] String address: %x", dest);
-		//dprintf("[MALLEABLE-ENCODE] String: %s", dest);
-		//if (!strcmp(dest, ""))
-		//{
-		dprintf("[MALLEABLE-ENCODE] Encoding for transport.");
+	if (result == ERROR_SUCCESS){
+		dprintf("[MALLEABLE-ENCODE] Got buffer: %s", buffer);
 		lua_State *L;
 		L = luaL_newstate();                        /* Create Lua state variable */
 		luaL_openlibs(L);                           /* Load Lua libraries */
-		//dprintf("[MALLEABLE] luaL_loadstring(): script: \"%s\"", luaScript);
-		//dprintf("[TIMOHELP] 777.1 luaScript %S", luaScript);
+		
 		if (luaL_loadstring(L, luaScript)) /* Load but don't run the Lua scripnt */
+		{ 
 			bail(L, "luaL_loadstring() failed");      /* Error out if file can't be read */
+			return NULL;
+		}
+			
 		dprintf("[MALLEABLE-ENCODE] lua_pcall(0,0,0) (init)");
-		dprintf("[MALLEABLE-ENCODE] LUA pcall answer: %i", lua_pcall(L, 0, 0, 0));
-		//if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
-		//	bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
-		dprintf("[MALLEABLE-ENCODE] LUA getglobal");
-		lua_getglobal(L, "encode");
-		dprintf("[MALLEABLE-ENCODE] LUA pushlstring");
+		if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
+		{
+			bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+			return NULL;
+		}
+		
+		lua_getglobal(L, "encode"); /* Load the method we want to call onto the LUA stack*/
 		size_t testSize = (size_t)*size;
 		
-		dprintf("[MALLEABLE-ENCODE] LUA pushlstring %s", lua_pushlstring(L, buffer, (size_t)testSize)); // casting without checking!
-		
+		lua_pushlstring(L, buffer, (size_t)testSize); // casting without checking!
+
+		size_t tmpLen = 1;
+
 		dprintf("[MALLEABLE-ENCODE] lua_pcall() (encode)");
 		if (lua_pcall(L, 1, 1, 0))
+		{
 			bail(L, "lua_pcall() failed");
-		dprintf("[MALLEABLE-ENCODE] lua_pcall() (encode)");
-		size_t tmpLen = 1;
-		dprintf("[MALLEABLE-ENCODETTTTTTTTTTTTTTT] size: %i", tmpLen);
+			return NULL;
+		}
+
 		const char* tmpResult = NULL;
 		tmpResult = luaL_tolstring(L, -1, &tmpLen);
 		PUCHAR encodedOut = NULL;
@@ -91,23 +88,17 @@ PUCHAR malleableEncode(LPVOID buffer, DWORD* size)
 			return NULL;
 		}
 		memcpy_s(encodedOut, tmpLen, tmpResult, tmpLen);
-		tmpResult = NULL; // TODO am I loosing memory here?
-		dprintf("[MALLEABLE-ENCODE] TESTTESTTEST");
-		dprintf("[MALLEABLE-ENCODETTTTTTTTTTTTTTT] size: %i", tmpLen);
+		tmpResult = NULL; // TODO am I loosing memory here? Cant't free because would have to cast from const char(and I had errors)
+
 		*size = (DWORD)tmpLen;
-		dprintf("[MALLEABLE-ENCODE] TESTTESTTEST");
+
 		dprintf("[MALLEABLE-ENCODE] Got \"%s\" back from lua_tostring()", encodedOut);
-		dprintf("[MALLEABLE-ENCODE] Giving buffer(%x) address %x", encodedOut);
-		dprintf("[MALLEABLE-ENCODE] Still going strong");
-		//SAFE_FREE(dest);
 		lua_close(L);
-		dprintf("[MALLEABLE-ENCODE] Still working");
 		
 		return encodedOut;
-		//}
 	}
 
-	dprintf("[MALLEABLE-ENCODE] Malleable encode end");
+	dprintf("[MALLEABLE-ENCODE] Malleable encode error end");
 	return NULL;
 }
 
