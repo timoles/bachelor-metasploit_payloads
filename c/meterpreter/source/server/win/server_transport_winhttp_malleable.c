@@ -91,7 +91,7 @@ PUCHAR malleableEncode(LPVOID buffer, DWORD* size)
 			return NULL;
 		}
 		memcpy_s(encodedOut, tmpLen, tmpResult, tmpLen);
-		tmpResult = NULL;
+		tmpResult = NULL; // TODO am I loosing memory here?
 		dprintf("[MALLEABLE-ENCODE] TESTTESTTEST");
 		dprintf("[MALLEABLE-ENCODETTTTTTTTTTTTTTT] size: %i", tmpLen);
 		*size = (DWORD)tmpLen;
