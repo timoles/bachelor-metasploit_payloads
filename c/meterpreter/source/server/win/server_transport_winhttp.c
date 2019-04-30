@@ -954,7 +954,7 @@ Transport* transport_create_http(MetsrvTransportHttp* config, LPDWORD size)
 	Transport* transport = (Transport*)malloc(sizeof(Transport));
 	HttpTransportContext* ctx = (HttpTransportContext*)malloc(sizeof(HttpTransportContext));
 	
-	// TIMO
+	// TIMO TODO remove
 	if (wcsncmp(config->common.url, L"m", 1) == 0)
 	{
 		dprintf("[TIMOHELP] 13.1");
@@ -1029,6 +1029,7 @@ Transport* transport_create_http(MetsrvTransportHttp* config, LPDWORD size)
 	transport->timeouts.retry_total = config->common.retry_total;
 	transport->timeouts.retry_wait = config->common.retry_wait;
 	transport->type = ctx->ssl ? METERPRETER_TRANSPORT_HTTPS : METERPRETER_TRANSPORT_HTTP;
+	dprintf("[TIMOHELP] transport->type ssl? %d", ctx->ssl);
 	ctx->url = transport->url = _wcsdup(config->common.url);
 	transport->packet_transmit = packet_transmit_http;
 	transport->server_dispatch = server_dispatch_http;
