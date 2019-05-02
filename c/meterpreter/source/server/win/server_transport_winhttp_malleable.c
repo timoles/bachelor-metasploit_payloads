@@ -404,7 +404,7 @@ static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hRe
 		dprintf("[WINHTTP MALLEABLE] Buffer address end: %x", buffer);
 		dprintf("[WINHTTP MALLEABLE] -------Sending out request. Size: %i. Buffer: %s", size, encodedBuffer);
 		dprintf("[WINHTTP MALLEABLE] -------Sending out request. Strlen: %i", strlen(encodedBuffer));
-		result = WinHttpSendRequest(hReq, NULL, 0, encodedBuffer, size, size, 0); // TODO nach hier noch fehler drinnen
+		result = WinHttpSendRequest(hReq, NULL, 0, encodedBuffer, size, size, 0);
 		SAFE_FREE(encodedBuffer);
 		return result;
 		/* TODO need to delete
