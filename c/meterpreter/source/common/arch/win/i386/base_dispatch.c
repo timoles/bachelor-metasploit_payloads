@@ -191,13 +191,21 @@ DWORD remote_request_core_transport_list(Remote* remote, Packet* packet)
 			packet_add_tlv_uint(transportGroup, TLV_TYPE_TRANS_RETRY_TOTAL, current->timeouts.retry_total);
 			dprintf("[DISPATCH] Adding Retry wait %u", current->timeouts.retry_wait);
 			packet_add_tlv_uint(transportGroup, TLV_TYPE_TRANS_RETRY_WAIT, current->timeouts.retry_wait);
-
+			dprintf("[TIMOHELP 2000] We have transport type: %d", current->type);
+			dprintf("[TIMOHELP 2001] We have transport type: %x", current->type);
+			dprintf("[TIMOHELP 2002] We want cases: %d", METERPRETER_TRANSPORT_HTTP);
+			dprintf("[TIMOHELP 2003] We want cases: %d", METERPRETER_TRANSPORT_HTTPS);
+			dprintf("[TIMOHELP 2004] We want cases: %d", METERPRETER_TRANSPORT_HTTP_MALLEABLE);
+			dprintf("[TIMOHELP 2005] We want cases: %d", METERPRETER_TRANSPORT_HTTPS_MALLEABLE);
+			dprintf("[TIMOHELP 2000] FUCK");
 			switch (current->type)
 			{
 				case METERPRETER_TRANSPORT_HTTP:
 				case METERPRETER_TRANSPORT_HTTPS:
 				case METERPRETER_TRANSPORT_HTTP_MALLEABLE: // TIMO
+				case METERPRETER_TRANSPORT_HTTPS_MALLEABLE: // TIMO
 				{
+					dprintf("[TIMOHELP 2000] Case was true");
 					HttpTransportContext* ctx = (HttpTransportContext*)current->ctx;
 					dprintf("[DISPATCH] Transport is HTTP/S");
 					if (ctx->ua)
