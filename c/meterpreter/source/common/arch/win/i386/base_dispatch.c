@@ -196,6 +196,7 @@ DWORD remote_request_core_transport_list(Remote* remote, Packet* packet)
 			{
 				case METERPRETER_TRANSPORT_HTTP:
 				case METERPRETER_TRANSPORT_HTTPS:
+				case METERPRETER_TRANSPORT_HTTP_MALLEABLE: // TIMO
 				{
 					HttpTransportContext* ctx = (HttpTransportContext*)current->ctx;
 					dprintf("[DISPATCH] Transport is HTTP/S");

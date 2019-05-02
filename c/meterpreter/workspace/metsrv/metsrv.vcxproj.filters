@@ -24,6 +24,114 @@
     <ClCompile Include="..\..\source\server\win\server_transport_named_pipe.c">
       <Filter>transports</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\server\win\server_transport_winhttp_malleable.c">
+      <Filter>transports</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lapi.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lauxlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lbaselib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lbitlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lcode.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lcorolib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lctype.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\ldblib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\ldebug.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\ldo.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\ldump.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lfunc.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lgc.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\linit.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\liolib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\llex.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lmathlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lmem.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\loadlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lobject.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lopcodes.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\loslib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lparser.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lstate.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lstring.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lstrlib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\ltable.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\ltablib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\ltm.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lua.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\luac.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lundump.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lutf8lib.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lvm.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lzio.c">
+      <Filter>LUA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\server\libloader.h" />
@@ -47,9 +155,93 @@
     <ClInclude Include="..\..\source\server\win\server_transport_named_pipe.h">
       <Filter>transports</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\source\server\win\server_transport_winhttp_malleable.h">
+      <Filter>transports</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lapi.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lauxlib.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lcode.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lctype.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\ldebug.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\ldo.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lfunc.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lgc.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\llex.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\llimits.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lmem.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lobject.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lopcodes.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lparser.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lprefix.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lstate.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lstring.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\ltable.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\ltm.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lua.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lua.hpp">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\luaconf.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lualib.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lundump.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lvm.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lzio.h">
+      <Filter>LUA</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\server\win\metsrv.def" />
+    <None Include="..\..\source\server\win\lua-5.3.5\src\Makefile">
+      <Filter>LUA</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="transports">
@@ -57,6 +249,9 @@
     </Filter>
     <Filter Include="pivots">
       <UniqueIdentifier>{71e24bf2-1e97-4a69-8092-d9606d341e80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LUA">
+      <UniqueIdentifier>{bd7502e4-42b6-44cf-b278-bc5995487389}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

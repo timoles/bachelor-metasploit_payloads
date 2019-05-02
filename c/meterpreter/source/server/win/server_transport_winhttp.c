@@ -10,6 +10,9 @@
 #include "../../common/packet_encryption.h"
 #include "../../common/pivot_packet_dispatch.h"
 
+// Timo
+#include "server_transport_winhttp_malleable.h"
+
 /*!
  * @brief Prepare a winHTTP request with the given context.
  * @param ctx Pointer to the HTTP transport context to prepare the request from.
@@ -19,6 +22,7 @@
  */
 static HINTERNET get_request_winhttp(HttpTransportContext *ctx, BOOL isGet, const char *direction)
 {
+	dprintf("[TIMOHELP] 1");
 	HINTERNET hReq = NULL;
 	DWORD flags = WINHTTP_FLAG_BYPASS_PROXY_CACHE;
 
@@ -192,6 +196,7 @@ static BOOL read_response_winhttp(HANDLE hReq, LPVOID buffer, DWORD bytesToRead,
  */
 static BOOL send_request_winhttp(HttpTransportContext* ctx, HANDLE hReq, LPVOID buffer, DWORD size)
 {
+	dprintf("[TIMOHELP] 2");
 	if (ctx->custom_headers)
 	{
 		dprintf("[WINHTTP] Sending with custom headers: %S", ctx->custom_headers);
@@ -219,6 +224,7 @@ static BOOL receive_response_winhttp(HANDLE hReq)
  */
 static DWORD validate_response_winhttp(HANDLE hReq, HttpTransportContext* ctx)
 {
+	dprintf("[TIMOHELP] 3");
 	DWORD statusCode;
 	DWORD statusCodeSize = sizeof(statusCode);
 	vdprintf("[PACKET RECEIVE WINHTTP] Getting the result code...");
@@ -291,6 +297,7 @@ static DWORD validate_response_winhttp(HANDLE hReq, HttpTransportContext* ctx)
  */
 static DWORD packet_transmit_http(Remote *remote, LPBYTE rawPacket, DWORD rawPacketLength)
 {
+	dprintf("[TIMOHELP] 4");
 	DWORD res = 0;
 	HINTERNET hReq;
 	BOOL result;
@@ -334,6 +341,7 @@ static DWORD packet_transmit_http(Remote *remote, LPBYTE rawPacket, DWORD rawPac
  */
 static DWORD packet_receive_http(Remote *remote, Packet **packet)
 {
+	dprintf("[TIMOHELP] 5");
 	DWORD headerBytes = 0, payloadBytesLeft = 0, res;
 	Packet *localPacket = NULL;
 	PacketHeader header;
@@ -544,6 +552,7 @@ out:
  */
 static BOOL server_init_winhttp(Transport* transport)
 {
+	dprintf("[TIMOHELP] 6");
 	URL_COMPONENTS bits;
 	wchar_t tmpHostName[URL_SIZE];
 	wchar_t tmpUrlPath[URL_SIZE];
@@ -613,6 +622,7 @@ static BOOL server_init_winhttp(Transport* transport)
  */
 static DWORD server_deinit_http(Transport* transport)
 {
+	dprintf("[TIMOHELP] 8");
 	HttpTransportContext* ctx = (HttpTransportContext*)transport->ctx;
 
 	dprintf("[HTTP] Deinitialising ...");
@@ -648,6 +658,7 @@ static DWORD server_deinit_http(Transport* transport)
  */
 static DWORD server_dispatch_http(Remote* remote, THREAD* dispatchThread)
 {
+	dprintf("[TIMOHELP] 9");
 	BOOL running = TRUE;
 	LONG result = ERROR_SUCCESS;
 	Packet* packet = NULL;
@@ -688,8 +699,11 @@ static DWORD server_dispatch_http(Remote* remote, THREAD* dispatchThread)
 			{
 				transport->comms_last_packet = current_unix_timestamp();
 			}
+			// TIMO mby we want to init  malleable here?
+
 			else if (result == ERROR_WINHTTP_CANNOT_CONNECT)
 			{
+				
 				dprintf("[DISPATCH] Failed to work correctly with WinHTTP, moving over to WinINET");
 				// next we need to indicate that we need to do a switch to wininet when we terminate
 				ctx->move_to_wininet = TRUE;
@@ -817,6 +831,7 @@ static DWORD server_dispatch_http(Remote* remote, THREAD* dispatchThread)
  */
 static void transport_destroy_http(Transport* transport)
 {
+	dprintf("[TIMOHELP] 10");
 	if (transport && (transport->type & METERPRETER_TRANSPORT_HTTP))
 	{
 		HttpTransportContext* ctx = (HttpTransportContext*)transport->ctx;
@@ -854,6 +869,7 @@ static void transport_destroy_http(Transport* transport)
 
 void transport_write_http_config(Transport* transport, MetsrvTransportHttp* config)
 {
+	dprintf("[TIMOHELP] 11");
 	HttpTransportContext* ctx = (HttpTransportContext*)transport->ctx;
 
 	dprintf("[HTTP CONF] Writing timeouts");
@@ -911,6 +927,7 @@ void transport_write_http_config(Transport* transport, MetsrvTransportHttp* conf
  */
 static DWORD transport_get_config_size_http(Transport* t)
 {
+	dprintf("[TIMOHELP] 12");
 	DWORD size = sizeof(MetsrvTransportHttp);
 
 	// Make sure we account for the custom headers, if there are any, which aren't
@@ -933,9 +950,17 @@ static DWORD transport_get_config_size_http(Transport* t)
  */
 Transport* transport_create_http(MetsrvTransportHttp* config, LPDWORD size)
 {
+	dprintf("[TIMOHELP] 13");
 	Transport* transport = (Transport*)malloc(sizeof(Transport));
 	HttpTransportContext* ctx = (HttpTransportContext*)malloc(sizeof(HttpTransportContext));
-
+	
+	// TIMO TODO remove
+	if (wcsncmp(config->common.url, L"m", 1) == 0)
+	{
+		dprintf("[TIMOHELP] 13.1");
+		//config->move_to_malleable = TRUE;
+	}
+	
  	if (size)
  	{
  		*size = sizeof(MetsrvTransportHttp);
@@ -1004,6 +1029,7 @@ Transport* transport_create_http(MetsrvTransportHttp* config, LPDWORD size)
 	transport->timeouts.retry_total = config->common.retry_total;
 	transport->timeouts.retry_wait = config->common.retry_wait;
 	transport->type = ctx->ssl ? METERPRETER_TRANSPORT_HTTPS : METERPRETER_TRANSPORT_HTTP;
+	dprintf("[TIMOHELP] transport->type ssl? %d", ctx->ssl);
 	ctx->url = transport->url = _wcsdup(config->common.url);
 	transport->packet_transmit = packet_transmit_http;
 	transport->server_dispatch = server_dispatch_http;
@@ -1014,5 +1040,7 @@ Transport* transport_create_http(MetsrvTransportHttp* config, LPDWORD size)
 	transport->comms_last_packet = current_unix_timestamp();
 	transport->get_config_size = transport_get_config_size_http;
 
+
+	dprintf("[TIMOHELP] 16");
 	return transport;
 }
