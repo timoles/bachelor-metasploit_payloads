@@ -29,10 +29,11 @@ void bail(lua_State *L, char *msg){ // TODO change this method name
 * @param Buffer size
 * @return PUCHAR which includes the retunred data from the LUA script
 */
-PUCHAR malleableEncode(LPVOID buffer, DWORD* size)
+PUCHAR malleableEncode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 {
 	dprintf("[MALLEABLE-ENCODE] Malleable encode start");
-	
+	static char luaScript[MALLEABLE_SCRIPT_SIZE];
+	wcstombs(luaScript, ctx->malleable_script, MALLEABLE_SCRIPT_SIZE);
 	//LONG result = ERROR_SUCCESS;
 	LONG result = ERROR_SUCCESS;
 	if (buffer == NULL){
@@ -105,9 +106,11 @@ PUCHAR malleableEncode(LPVOID buffer, DWORD* size)
 
 }
 
-LPBYTE malleableDecode(LPVOID buffer, DWORD* size)
+LPBYTE malleableDecode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 {
 	dprintf("[MALLEABLE-DECODE] Malleable decode start");
+	static char luaScript[MALLEABLE_SCRIPT_SIZE];
+	wcstombs(luaScript, ctx->malleable_script, MALLEABLE_SCRIPT_SIZE);
 	BOOL result = ERROR_SUCCESS;
 	if (buffer == NULL){
 		dprintf("[MALLEABLE-DECODE] Buffer reference was NULL!");
@@ -399,7 +402,7 @@ static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hRe
 	{
 		LPVOID encodedBuffer = NULL;
 		// Create copy of buffer
-		encodedBuffer = malleableEncode(buffer, &size);
+		encodedBuffer = malleableEncode(ctx, buffer, &size);
 		//malleableEncode(buffer, &size);
 		dprintf("[WINHTTP MALLEABLE] Buffer address end: %x", buffer);
 		dprintf("[WINHTTP MALLEABLE] -------Sending out request. Size: %i. Buffer: %s", size, encodedBuffer);
@@ -721,7 +724,7 @@ static DWORD packet_receive_http_malleable(Remote *remote, Packet **packet)
 	}
 	dprintf("[TIMOHELP] 320");
 	dprintf("[TIMOHELP] 321.0 Packetbuffer. Size: %i; Buffer: %s", testCurrentPayloadSize, (PUCHAR)testPayload);
-	testPayload = malleableDecode(testPayload, &testCurrentPayloadSize);
+	testPayload = malleableDecode(ctx,testPayload, &testCurrentPayloadSize);
 	dprintf("[TIMOHELP] 321.1 Packetbuffer. Size: %i; Buffer: %s", testCurrentPayloadSize, (PUCHAR)testPayload);
 	dprintf("[TIMOHELP] 322");
 
@@ -1326,11 +1329,14 @@ Transport* transport_create_http_malleable(MetsrvTransportHttp* config, LPDWORD 
 //	dprintf("[TRANS HTTP MALLEABLE-----] Given LUA script: %S", config->malleable_script);
 	if (config->malleable_script[0])
 	{
-		wcstombs(luaScript, config->malleable_script, MALLEABLE_SCRIPT_SIZE);
+		dprintf("[TIMOHELP] 200.81 luaScript copy begin");
+		// wcstombs(luaScript, config->malleable_script, MALLEABLE_SCRIPT_SIZE); // old implementation
+		ctx->malleable_script = _wcsdup(config->malleable_script);
+		dprintf("[TIMOHELP] 200.82 luaScript copy end");
 		//wcstombs_s(NULL, luaScript, sizeof(luaScript), config->malleable_script, sizeof(luaScript)); // TODO erno
 		//luaScript = (char*)(config->malleable_script); // TODO TIMO include in ctx? also probably cancel if we don't have a script
 	}
-	dprintf("[TIMOHELP] 200.89 luaScript %S", luaScript);
+	dprintf("[TIMOHELP] 200.89 luaScript %S", ctx->malleable_script);
 	dprintf("[TIMOHELP] 200.9 Still works");
 
 	dprintf("[TRANS HTTP MALLEABLE] Given ua: %S", config->ua);

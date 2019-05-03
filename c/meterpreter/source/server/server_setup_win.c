@@ -307,6 +307,7 @@ static void config_create(Remote* remote, LPBYTE uuid, MetsrvConfig** config, LP
 				transport_write_named_pipe_config(t, (MetsrvTransportNamedPipe*)target);
 				break;
 			}
+			// TIMO TODO HERE!
 			case METERPRETER_TRANSPORT_HTTP:
 			case METERPRETER_TRANSPORT_HTTPS:
 			{
