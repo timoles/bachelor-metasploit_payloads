@@ -59,11 +59,11 @@ typedef struct ___u128 {
 #define METERPRETER_TRANSPORT_HTTPS  (0x4 | METERPRETER_TRANSPORT_HTTP)
 /*! @brief Indication that the Meterpreter transport is using  named pipes. */
 #define METERPRETER_TRANSPORT_PIPE   0x8
-// TIMO
+// TIMO // TIMO TODO I don't think we need those malelable thingis because we handle it in malleable 
 /*! @brief Indication that the Meterpreter transport is using HTTP MALLEABLE. */
-#define METERPRETER_TRANSPORT_HTTP_MALLEABLE   0x26
+#define METERPRETER_TRANSPORT_HTTP_MALLEABLE   0x10
 /*! @brief Indication that the Meterpreter transport is using HTTPS MALLEABLE. */
-#define METERPRETER_TRANSPORT_HTTPS_MALLEABLE  (0x28 | METERPRETER_TRANSPORT_HTTP_MALLEABLE)
+#define METERPRETER_TRANSPORT_HTTPS_MALLEABLE  (0x12 | METERPRETER_TRANSPORT_HTTP_MALLEABLE)
 
 VOID sleep(DWORD seconds);
 
