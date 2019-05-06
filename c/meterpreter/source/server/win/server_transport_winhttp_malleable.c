@@ -36,10 +36,12 @@ PUCHAR malleableEncode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 	wcstombs(luaScript, ctx->malleable_script, MALLEABLE_SCRIPT_SIZE);
 	//LONG result = ERROR_SUCCESS;
 	LONG result = ERROR_SUCCESS;
+	/*
 	if (buffer == NULL){
 		dprintf("[MALLEABLE-ENCODE] Buffer reference was NULL!");
 		result = ERROR_MALLEABLE_BUFFER_NULL; 
 	}
+	*/
 	if (!strcmp(luaScript, "")){
 		dprintf("[MALLEABLE-ENCODE] LUA script not set yet");
 		result = ERROR_MALLEABLE_LUA_SCRIPT_EMPTY;
@@ -81,6 +83,11 @@ PUCHAR malleableEncode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 
 		const char* tmpResult = NULL;
 		tmpResult = luaL_tolstring(L, -1, &tmpLen);
+		if (tmpLen == (size_t)0) // tmpLen is 0 when LUA also returns a NULL
+		{
+			lua_close(L);
+			return NULL;
+		}
 
 		PUCHAR encodedOut = NULL;
 		encodedOut = malloc(tmpLen);
@@ -371,26 +378,23 @@ static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hRe
 	dprintf("[WINHTTP MALLEABLE] Buffer address begin: %x", buffer);
 	BOOL result;
 	// TODO TIMO, we need to handle having custom headers, also better handling of buffer NULL
-	if (buffer != NULL)
-	{
-		LPVOID encodedBuffer = NULL;
-		// Create copy of buffer
-		encodedBuffer = malleableEncode(ctx, buffer, &size);
-		//malleableEncode(buffer, &size);
-		dprintf("[WINHTTP MALLEABLE] Buffer address end: %x", buffer);
-		dprintf("[WINHTTP MALLEABLE] -------Sending out request. Size: %i. Buffer: %s", size, encodedBuffer);
-		dprintf("[WINHTTP MALLEABLE] -------Sending out request. Strlen: %i", strlen(encodedBuffer));
-		result = WinHttpSendRequest(hReq, NULL, 0, encodedBuffer, size, size, 0);
-		SAFE_FREE(encodedBuffer);
-		return result;
-	}
+	LPVOID encodedBuffer = NULL;
+	// Create copy of buffer
+	encodedBuffer = malleableEncode(ctx, buffer, &size);
+	//malleableEncode(buffer, &size);
+	dprintf("[WINHTTP MALLEABLE] Buffer address end: %x", buffer);
+	dprintf("[WINHTTP MALLEABLE] -------Sending out request. Size: %i. Buffer: %s", size, encodedBuffer);
+	
 	if (ctx->custom_headers)
 	{
 		dprintf("[WINHTTP MALLEABLE] Sending with custom headers: %S", ctx->custom_headers);
-		return WinHttpSendRequest(hReq, ctx->custom_headers, -1L, buffer, size, size, 0);
+		result = WinHttpSendRequest(hReq, ctx->custom_headers, 0, encodedBuffer, size, size, 0);
 	}
-	dprintf("[WINHTTP MALLEABLE] Sending out request. Size: %i. Buffer: %s",size, buffer);
-	result = WinHttpSendRequest(hReq, NULL, 0, buffer, size, size, 0);
+	else
+	{
+		result = WinHttpSendRequest(hReq, NULL, 0, encodedBuffer, size, size, 0);
+	}
+	SAFE_FREE(encodedBuffer);
 	return result;
 }
 
