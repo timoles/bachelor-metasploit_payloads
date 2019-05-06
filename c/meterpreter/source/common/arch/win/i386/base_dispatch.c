@@ -80,6 +80,82 @@ DWORD create_transport_from_request(Remote* remote, Packet* packet, Transport** 
 			memcpy(config.common.url, transportUrl, sizeof(config.common.url));
 			transport = remote->trans_create(remote, &config.common, NULL);
 		}
+		else if (wcsncmp(transportUrl, L"httpm", 5) == 0)
+		{
+			BOOL ssl = wcsncmp(transportUrl, L"httpms", 6) == 0;
+			wchar_t* ua = packet_get_tlv_value_wstring(packet, TLV_TYPE_TRANS_UA);
+			wchar_t* proxy = packet_get_tlv_value_wstring(packet, TLV_TYPE_TRANS_PROXY_HOST);
+			wchar_t* proxyUser = packet_get_tlv_value_wstring(packet, TLV_TYPE_TRANS_PROXY_USER);
+			wchar_t* proxyPass = packet_get_tlv_value_wstring(packet, TLV_TYPE_TRANS_PROXY_PASS);
+			PBYTE certHash = packet_get_tlv_value_raw(packet, TLV_TYPE_TRANS_CERT_HASH);
+			wchar_t* headers = packet_get_tlv_value_wstring(packet, TLV_TYPE_TRANS_HEADERS);
+
+			// Timo
+			wchar_t* malleable_script = packet_get_tlv_value_wstring(packet, TLV_TYPE_TRANS_MALLEABLE_SCRIPT);
+			size_t configSize = sizeof(MetsrvTransportHttp);
+			if (headers)
+			{
+				// this already caters for the null byte because it's included in the structure.
+				configSize += wcslen(headers);
+			}
+
+			MetsrvTransportHttp* config = (MetsrvTransportHttp*)calloc(1, configSize);
+			config->common.comms_timeout = timeouts.comms;
+			config->common.retry_total = timeouts.retry_total;
+			config->common.retry_wait = timeouts.retry_wait;
+			wcsncpy(config->common.url, transportUrl, URL_SIZE);
+
+			if (proxy)
+			{
+				wcsncpy(config->proxy.hostname, proxy, PROXY_HOST_SIZE);
+				free(proxy);
+			}
+
+			if (proxyUser)
+			{
+				wcsncpy(config->proxy.username, proxyUser, PROXY_USER_SIZE);
+				free(proxyUser);
+			}
+
+			if (proxyPass)
+			{
+				wcsncpy(config->proxy.password, proxyPass, PROXY_PASS_SIZE);
+				free(proxyPass);
+			}
+
+			if (ua)
+			{
+				wcsncpy(config->ua, ua, UA_SIZE);
+				free(ua);
+			}
+
+			if (certHash)
+			{
+				memcpy(config->ssl_cert_hash, certHash, CERT_HASH_SIZE);
+				// No need to free this up as it's not a wchar_t
+			}
+
+			if (headers)
+			{
+				wcscpy(config->custom_headers, headers);
+			}
+
+			if (malleable_script)
+			{
+				dprintf("[TIMOHELP 5353] We found a new malleable transport script, copying it...");
+				wcsncpy(config->malleable_script, malleable_script, MALLEABLE_SCRIPT_SIZE);
+				dprintf("[TIMOHELP 5353] Copy done, free old..." );
+				dprintf("[TIMOHELP 5353] New script: %S", config->malleable_script );
+				free(malleable_script); // TODO TIMO why free and not safe_free?
+				dprintf("[TIMOHELP 5353] everything done");
+			}else{
+				return ERROR_MALLEABLE_SCRIPT_MISSING;
+			}
+
+			transport = remote->trans_create(remote, &config->common, NULL);
+
+			free(config);
+		}
 		else
 		{
 			BOOL ssl = wcsncmp(transportUrl, L"https", 5) == 0;
@@ -191,21 +267,14 @@ DWORD remote_request_core_transport_list(Remote* remote, Packet* packet)
 			packet_add_tlv_uint(transportGroup, TLV_TYPE_TRANS_RETRY_TOTAL, current->timeouts.retry_total);
 			dprintf("[DISPATCH] Adding Retry wait %u", current->timeouts.retry_wait);
 			packet_add_tlv_uint(transportGroup, TLV_TYPE_TRANS_RETRY_WAIT, current->timeouts.retry_wait);
-			dprintf("[TIMOHELP 2000] We have transport type: %d", current->type);
-			dprintf("[TIMOHELP 2001] We have transport type: %x", current->type);
-			dprintf("[TIMOHELP 2002] We want cases: %d", METERPRETER_TRANSPORT_HTTP);
-			dprintf("[TIMOHELP 2003] We want cases: %d", METERPRETER_TRANSPORT_HTTPS);
-			dprintf("[TIMOHELP 2004] We want cases: %d", METERPRETER_TRANSPORT_HTTP_MALLEABLE);
-			dprintf("[TIMOHELP 2005] We want cases: %d", METERPRETER_TRANSPORT_HTTPS_MALLEABLE);
-			dprintf("[TIMOHELP 2000] FUCK");
+
 			switch (current->type)
 			{
 				case METERPRETER_TRANSPORT_HTTP:
 				case METERPRETER_TRANSPORT_HTTPS:
-				case METERPRETER_TRANSPORT_HTTP_MALLEABLE: // TIMO
+				case METERPRETER_TRANSPORT_HTTP_MALLEABLE: // TIMO TODO I don't think we need those
 				case METERPRETER_TRANSPORT_HTTPS_MALLEABLE: // TIMO
 				{
-					dprintf("[TIMOHELP 2000] Case was true");
 					HttpTransportContext* ctx = (HttpTransportContext*)current->ctx;
 					dprintf("[DISPATCH] Transport is HTTP/S");
 					if (ctx->ua)

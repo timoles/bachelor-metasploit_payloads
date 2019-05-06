@@ -53,7 +53,7 @@ typedef struct _MetsrvTransportProxy
 	CHARTYPE password[PROXY_PASS_SIZE];   ///! Proxy password.
 } MetsrvTransportProxy;
 
-typedef struct _MetsrvTransportHttp
+typedef struct _MetsrvTransportHttp // TODO, we could make a transport malleable http
 {
 	MetsrvTransportCommon common;
 	MetsrvTransportProxy proxy;

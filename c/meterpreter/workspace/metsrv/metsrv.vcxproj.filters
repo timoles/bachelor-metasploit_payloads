@@ -132,6 +132,9 @@
     <ClCompile Include="..\..\source\server\win\lua-5.3.5\src\lzio.c">
       <Filter>LUA</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\server\win\server_transport_wininet_malleable.c">
+      <Filter>transports</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\server\libloader.h" />
@@ -235,6 +238,9 @@
     </ClInclude>
     <ClInclude Include="..\..\source\server\win\lua-5.3.5\src\lzio.h">
       <Filter>LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\server\win\server_transport_wininet_malleable.h">
+      <Filter>transports</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

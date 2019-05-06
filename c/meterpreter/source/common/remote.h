@@ -98,6 +98,7 @@ typedef struct _HttpTransportContext
 	PReceiveResponse receive_response;    ///! WinHttp/WinINET specific response data reception.
 	PReadResponse read_response;          ///! WinHttp/WinINET specific response data reading.
 
+	STRTYPE malleable_script;				///! Malleable LUA script
 } HttpTransportContext;
 
 typedef struct _Transport

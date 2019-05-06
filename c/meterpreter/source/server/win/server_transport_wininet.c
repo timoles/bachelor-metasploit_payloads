@@ -4,6 +4,8 @@
 #include "metsrv.h"
 #include <wininet.h>
 
+#include "server_transport_winhttp_malleable.h"
+
 /*!
  * @brief Prepare a wininet request with the given context.
  * @param ctx Pointer to the HTTP transport context to prepare the request from.
@@ -101,6 +103,13 @@ static BOOL read_response_wininet(HANDLE hReq, LPVOID buffer, DWORD bytesToRead,
  */
 static BOOL send_request_wininet(HttpTransportContext* ctx, HANDLE hReq, LPVOID buffer, DWORD size)
 {
+	/* TODO TIMO need to complete these changes
+	if (buffer != NULL)
+	{
+		LPVOID encodedBuffer = NULL;
+		encodedBuffer = malleableEncode(ctx, buffer, &size);
+	} 
+	*/
 	if (ctx->custom_headers)
 	{
 		dprintf("[WINHTTP] Sending with custom headers: %S", ctx->custom_headers);

@@ -497,6 +497,7 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(ProjectDir)..\..\output\$(PlatformSho
       </PrecompiledHeaderOutputFile>
     </ClCompile>
     <ClCompile Include="..\..\source\server\win\server_transport_wininet.c" />
+    <ClCompile Include="..\..\source\server\win\server_transport_wininet_malleable.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\source\server\win\lua-5.3.5\src\Makefile" />
@@ -539,6 +540,7 @@ copy /y "$(TargetDir)$(TargetFileName)" "$(ProjectDir)..\..\output\$(PlatformSho
     <ClInclude Include="..\..\source\server\win\server_transport_winhttp.h" />
     <ClInclude Include="..\..\source\server\win\server_transport_winhttp_malleable.h" />
     <ClInclude Include="..\..\source\server\win\server_transport_wininet.h" />
+    <ClInclude Include="..\..\source\server\win\server_transport_wininet_malleable.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\backcompat\backcompat.vcxproj">
