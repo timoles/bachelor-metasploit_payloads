@@ -28,4 +28,7 @@ Transport* transport_create_http_malleable(MetsrvTransportHttp* httpConfig, LPDW
 
 void transport_move_to_malleable(Transport* transport);
 
+// TIMO
+PUCHAR malleableEncode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size);
+LPBYTE malleableDecode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size);
 #endif

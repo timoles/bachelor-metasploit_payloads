@@ -148,6 +148,8 @@ DWORD create_transport_from_request(Remote* remote, Packet* packet, Transport** 
 				dprintf("[TIMOHELP 5353] New script: %S", config->malleable_script );
 				free(malleable_script); // TODO TIMO why free and not safe_free?
 				dprintf("[TIMOHELP 5353] everything done");
+			}else{
+				return ERROR_MALLEABLE_SCRIPT_MISSING;
 			}
 
 			transport = remote->trans_create(remote, &config->common, NULL);

@@ -65,6 +65,9 @@ typedef struct ___u128 {
 /*! @brief Indication that the Meterpreter transport is using HTTPS MALLEABLE. */
 #define METERPRETER_TRANSPORT_HTTPS_MALLEABLE  (0x12 | METERPRETER_TRANSPORT_HTTP_MALLEABLE)
 
+/*! @brief ERROR  result in case of a missing malleable script during transport creation*/ //TODO timo is this number ok?
+#define ERROR_MALLEABLE_SCRIPT_MISSING 7000L
+
 VOID sleep(DWORD seconds);
 
 #ifdef DEBUGTRACE

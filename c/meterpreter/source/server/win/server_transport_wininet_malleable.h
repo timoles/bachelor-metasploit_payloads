@@ -1,0 +1,6 @@
+#ifndef _METERPRETER_SERVER_TRANSPORT_WININET_MALLEABLE
+#define _METERPRETER_SERVER_TRANSPORT_WININET_MALLEABLE
+
+void transport_move_to_wininet_malleable(Transport* transport);
+
+#endif

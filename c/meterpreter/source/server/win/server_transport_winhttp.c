@@ -954,13 +954,6 @@ Transport* transport_create_http(MetsrvTransportHttp* config, LPDWORD size)
 	Transport* transport = (Transport*)malloc(sizeof(Transport));
 	HttpTransportContext* ctx = (HttpTransportContext*)malloc(sizeof(HttpTransportContext));
 	
-	// TIMO TODO remove
-	if (wcsncmp(config->common.url, L"m", 1) == 0)
-	{
-		dprintf("[TIMOHELP] 13.1");
-		//config->move_to_malleable = TRUE;
-	}
-	
  	if (size)
  	{
  		*size = sizeof(MetsrvTransportHttp);
