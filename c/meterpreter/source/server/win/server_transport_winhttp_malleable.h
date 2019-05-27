@@ -26,7 +26,7 @@
 void transport_write_http_malleable_config(Transport* transport, MetsrvTransportHttp* config);
 Transport* transport_create_http_malleable(MetsrvTransportHttp* httpConfig, LPDWORD size);
 
-void transport_move_to_malleable(Transport* transport);
+void transport_move_to_malleable(Transport* transport); // TODO, seems to not be imlemented
 
 // TIMO
 PUCHAR malleableEncode(HttpTransportContext* ctx, LPVOID buffer, DWORD* size);
