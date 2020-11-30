@@ -1,3 +1,12 @@
+(Incomplete) Notes and code for my bachelors thesis.
+
+As a PoC I developed a Meterpreter fork which allows an attacker to modify HTTP traffic on the fly with a LUA script.
+The LUA script has to be provided during the payload generation and can be interchanged at any point during the runtime.
+The script hooks into the HTTP traffic right before it gets passed to the Windows HTTP API.
+
+The traffic is similar Meterpreter_runtime -> LUA transformation -> Windows HTTP API call -> Traffic is sent out -> openresty takes the traffic and transforms it back -> meterpreter handler recieves traffic). This works both ways. Due to the transformation within openresty (nginx) minimal changes within Metasploit had to be implemented.
+
+
 metasploit-payloads >
 =====================
 
